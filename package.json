@@ -1,0 +1,32 @@
+{
+  "name": "witch-clock",
+  "version": "0.0.0",
+  "description": "get dates relative to equinoxes and solstices",
+  "main": "index.js",
+  "bin": "./bin/index.js",
+  "scripts": {
+    "test": "standard bin/*.js lib/*.js test/*.js && mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/garbados/witch-clock.git"
+  },
+  "keywords": [
+    "time"
+  ],
+  "author": "d dino",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/garbados/witch-clock/issues"
+  },
+  "homepage": "https://github.com/garbados/witch-clock#readme",
+  "devDependencies": {
+    "docco": "^0.7.0",
+    "mocha": "^3.2.0",
+    "standard": "^8.6.0"
+  },
+  "dependencies": {
+    "astronomia": "^1.3.0",
+    "commander": "^2.9.0"
+  }
+}
