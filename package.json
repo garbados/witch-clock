@@ -1,7 +1,7 @@
 {
   "name": "witch-clock",
-  "version": "0.0.0",
-  "description": "get dates relative to equinoxes and solstices",
+  "version": "1.0.0",
+  "description": "get dates relative to solar and lunar events",
   "main": "index.js",
   "bin": "./bin/index.js",
   "scripts": {
