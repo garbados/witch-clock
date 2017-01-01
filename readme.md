@@ -19,10 +19,10 @@ var witch = require('witch-clock')
 var date = new Date(...)
 var event = witch.solar.soonest(date)
 console.log(event)
-> [ 'vernal equinox', 2017-03-20T10:28:52.704Z ]
+> { code:"VE+78", date: 2017-03-20T10:28:52.704Z, name: "vernal equinox"}
 ```
 
-`witch-clock` includes two modules: `solar` and `lunar`, each with two methods: `soonest` and `recent`. They return the nearest upcoming or nearest past solar or lunar event, respectively.
+`witch-clock` exposes more methods than that but I haven't documented them yet. Kick up `node`, `require('witch-clock')` into some throwaway variable, and poke around!
 
 ## Usage, CLI
 
