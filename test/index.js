@@ -51,10 +51,10 @@ describe('witch-clock', function () {
 
       // test dates against answers
       var dates = {
-        january: new Date(1984, 0, 16),
-        april: new Date(1996, 3, 4),
-        august: new Date(1988, 7, 16),
-        november: new Date(2016, 10, 8)
+        january: new Date('1984-01-16T08:00:00.000Z'),
+        april: new Date('1996-04-04T08:00:00.000Z'),
+        august: new Date('1988-08-16T08:00:00.000Z'),
+        november: new Date('2016-11-08T08:00:00.000Z')
       }
 
       Object.keys(dates).forEach(function (month) {
@@ -73,6 +73,7 @@ describe('witch-clock', function () {
             Object.keys(ANSWERS[month][key]).forEach(function (funcName) {
               var answer = ANSWERS[month][key][funcName]
               var guess = witch[key][funcName](date)
+              console.log()
               assert.equal(guess[0], answer[0])
               assert.equal(guess[1].getTime(), answer[1].getTime())
             })
