@@ -12,9 +12,6 @@ function eventToShortCode (codes, event) {
   return [code, Math.floor(-daysTil)].join(sep)
 }
 
-var toLunar = eventToShortCode.bind(null, witch.lunar.CODES)
-var toSolar = eventToShortCode.bind(null, witch.solar.CODES)
-
 program
 .version(pkg.version)
 .usage('[date]')
