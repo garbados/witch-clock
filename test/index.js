@@ -73,7 +73,6 @@ describe('witch-clock', function () {
             Object.keys(ANSWERS[month][key]).forEach(function (funcName) {
               var answer = ANSWERS[month][key][funcName]
               var guess = witch[key][funcName](date)
-              console.log()
               assert.equal(guess[0], answer[0])
               assert.equal(guess[1].getTime(), answer[1].getTime())
             })
