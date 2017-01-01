@@ -20,44 +20,25 @@ program
 .parse(process.argv)
 
 var date = program.args[0] ? new Date(program.args[0]) : new Date() // TODO accept argv[1] as date
-var events = {
-  solar: {
-    soonest: witch.solar.soonest(date),
-    recent: witch.solar.recent(date)
-  },
-  lunar: {
-    soonest: witch.lunar.soonest(date),
-    recent: witch.lunar.recent(date)
-  }
-}
-
-var eventDetails = {}
-Object.keys(events).forEach(function (eventType) {
-  eventDetails[eventType] = {}
-  Object.keys(events[eventType]).forEach(function (funcType) {
-    var event = events[eventType][funcType]
-    var details = {
-      code: eventToShortCode(witch[eventType].CODES, event),
-      name: event[0],
-      date: event[1]
-    }
-    eventDetails[eventType][funcType] = details
-  })
-})
-
+var events = witch.events(date)
 if (program.json) {
-  console.log(JSON.stringify(eventDetails))
+  console.log(JSON.stringify(events))
 } else {
-  var toPrint = []
-  Object.keys(events).forEach(function (eventType) {
-    Object.keys(events[eventType]).forEach(function (funcType) {
-      var detail = eventDetails[eventType][funcType]
-      if (program.verbose) {
-        console.log(detail.code, '|', detail.name, '@', detail.date)
-      } else {
-        toPrint.push(detail.code)
-      }
+  var flatEvents = []
+  ;['solar', 'lunar'].forEach(function (group) {
+    ['soonest', 'recent'].forEach(function (type) {
+      flatEvents.push(events[group][type])
     })
   })
-  if (toPrint.length) console.log(toPrint.join(', '))
+
+  if (program.verbose) {
+    flatEvents.forEach(function (event) {
+      console.log(event.code, '|', event.name, '@', event.date)
+    })
+  } else {
+    var toPrint = flatEvents.map(function (event) {
+      return event.code
+    }).join(', ')
+    console.log(toPrint)
+  }
 }
