@@ -18,12 +18,25 @@ program
 .version(pkg.version)
 .usage('[date]')
 .option('-v, --verbose', 'display additional information')
+.option('-j, --json', 'display dates as JSON')
 .parse(process.argv)
 
 var date = program.args[0] ? new Date(program.args[0]) : new Date() // TODO accept argv[1] as date
 var solarFuncs = [witch.solar.soonest, witch.solar.recent]
 var lunarFuncs = [witch.lunar.soonest, witch.lunar.recent]
-if (program.verbose) {
+if (program.json) {
+  var events = {
+    solar: {
+      soonest: toSolar(witch.solar.soonest(date)),
+      recent: toSolar(witch.solar.recent(date))
+    },
+    lunar: {
+      soonest: toLunar(witch.lunar.soonest(date)),
+      recent: toLunar(witch.lunar.recent(date))
+    }
+  }
+  console.log(JSON.stringify(events))
+} else if (program.verbose) {
   solarFuncs.forEach(function (solarFunc) {
     var event = solarFunc(date)
     var code = toSolar(event)
