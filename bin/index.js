@@ -4,14 +4,6 @@ var program = require('commander')
 var witch = require('../lib')
 var pkg = require('../package.json')
 
-function eventToShortCode (codes, event) {
-  var code = codes[event[0]]
-  var date = new Date(event[1])
-  var daysTil = (date.getTime() - Date.now()) / 1000 / 60 / 60 / 24
-  var sep = (daysTil < 0) ? '+' : ''
-  return [code, Math.floor(-daysTil)].join(sep)
-}
-
 program
 .version(pkg.version)
 .usage('[date]')
