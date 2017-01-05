@@ -4,7 +4,7 @@
 
 Tool for computing dates around solstices and equinoxes, answering questions like, "How many days until the Summer Solstice?"
 
-witch-clock concerns itself with solstices and equinoxes. For more witchy star shit, check out [astronomia](https://www.npmjs.com/package/astronomia).
+witch-clock concerns itself with solstices, equinoxes, and the phases of the moon. For more witchy star shit, check out [astronomia](https://www.npmjs.com/package/astronomia).
 
 ## Install
 
