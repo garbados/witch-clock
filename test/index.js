@@ -90,4 +90,15 @@ describe('witch-clock', function () {
       })
     })
   })
+
+  describe('events', function () {
+    it('should report codes correctly', function () {
+      var date = new Date('2017-01-05T08:23:38.616Z')
+      var events = witch.events(date)
+      assert.equal(events.solar.soonest.code, 'VE-74')
+      assert.equal(events.solar.recent.code, 'WS+15')
+      assert.equal(events.lunar.soonest.code, 'FIRST-0')
+      assert.equal(events.lunar.recent.code, 'NEW+7')
+    })
+  })
 })
