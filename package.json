@@ -1,6 +1,6 @@
 {
   "name": "witch-clock",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "get dates relative to solar and lunar events",
   "main": "index.js",
   "bin": "./bin/index.js",
