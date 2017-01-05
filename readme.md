@@ -19,7 +19,7 @@ var witch = require('witch-clock')
 var date = new Date(...)
 var event = witch.solar.soonest(date)
 console.log(event)
-> { code:"VE+78", date: 2017-03-20T10:28:52.704Z, name: "vernal equinox"}
+> { code:"VE-78", date: 2017-03-20T10:28:52.704Z, name: "vernal equinox"}
 ```
 
 `witch-clock` exposes more methods than that but I haven't documented them yet. Kick up `node`, `require('witch-clock')` into some throwaway variable, and poke around!
@@ -83,6 +83,8 @@ witch-clock expresses dates like "VE-80" or "SS+12" but telling your friend "it'
 - "-": "sub", "+": "plus"
 
 So "VE-80" becomes "vern sub eighty". Of course, that won't make sense either to someone who doesn't understand the format. "Oh, I mean, eighty days til the vernal equinox."
+
+**N.B.:** If an event is "-0" as in "VE-0" or "FIRST-0" then that event is happening *today*. If an event is "+0" then it happened less than a day ago.
 
 ## License
 
