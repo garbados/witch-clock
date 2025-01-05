@@ -1,12 +1,13 @@
 {
   "name": "witch-clock",
   "type": "module",
-  "version": "1.0.1",
-  "description": "get dates relative to solar and lunar events",
+  "version": "2.0.0",
+  "description": "Annotate dates within the Calendar of the Witchmothers",
   "main": "index.js",
-  "bin": "./bin/index.js",
   "scripts": {
-    "test": "standard bin/*.js lib/*.js test/*.js && mocha"
+    "test": "npm run test:standard && npm run test:mocha",
+    "test:standard": "standard",
+    "test:mocha": "mocha"
   },
   "repository": {
     "type": "git",
@@ -22,12 +23,10 @@
   },
   "homepage": "https://github.com/garbados/witch-clock#readme",
   "devDependencies": {
-    "docco": "^0.7.0",
     "mocha": "^11.0.1",
     "standard": "^17.1.2"
   },
   "dependencies": {
-    "astronomia": "^4.1.1",
-    "commander": "^13.0.0"
+    "astronomia": "^4.1.1"
   }
 }
