@@ -36,9 +36,9 @@ describe('witch-clock', function () {
           assert.ok(witchy.phase.date > 0)
           assert.ok(witchy.phase.rem >= 0)
           // month checks
-          assert.ok(MONTHS.includes(witchy.month.name), `Unknown month: ${witchy.month.name}`)
-          assert.ok(MONTHS.includes(witchy.month.next), `Unknown month: ${witchy.month.next}`)
-          assert.ok(witchy.month.end.getTime() > witchy.month.start.getTime())
+          assert.ok(MONTHS.includes(witchy.month.current[0]), `Unknown month: ${witchy.month.current[0]}`)
+          assert.ok(MONTHS.includes(witchy.month.upcoming[0]), `Unknown month: ${witchy.month.upcoming[0]}`)
+          assert.ok(witchy.month.upcoming[1].getTime() > witchy.month.current[1].getTime())
           assert.ok(witchy.month.date > 0)
           assert.ok(witchy.month.rem >= 0)
           // day checks

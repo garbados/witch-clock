@@ -212,10 +212,8 @@ export function getDateInfo (date, lat, long) {
     monthName = MONTHS[monthsSinceStart]
   }
   witchy.month = {
-    name: monthName,
-    next: MONTHS[monthsSinceStart + 1],
-    start: monthStart,
-    end: monthEnd,
+    current: [monthName, monthStart],
+    upcoming: [MONTHS[monthsSinceStart + 1], monthEnd],
     date: daysSinceMonthStart,
     rem: daysLeftInMonth
   }

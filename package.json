@@ -7,7 +7,10 @@
   "scripts": {
     "test": "npm run test:standard && npm run test:mocha",
     "test:standard": "standard",
-    "test:mocha": "mocha"
+    "test:mocha": "mocha",
+    "build": "esbuild --bundle web.js --minify --outdir=www",
+    "dev": "sane \"npm run build\" . --glob=web.js",
+    "serve": "serve www"
   },
   "repository": {
     "type": "git",
@@ -23,7 +26,10 @@
   },
   "homepage": "https://github.com/garbados/witch-clock#readme",
   "devDependencies": {
+    "esbuild": "^0.24.2",
     "mocha": "^11.0.1",
+    "sane": "^5.0.1",
+    "serve": "^14.2.4",
     "standard": "^17.1.2"
   },
   "dependencies": {
