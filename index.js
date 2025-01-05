@@ -69,10 +69,83 @@ export const MONTHS = [
   'Corpse'
 ]
 
+export const MAX_ABS_LAT = 72
+
 export function getDateInfo (date, lat, long) {
   if (date === undefined) date = new Date()
   long = -1 * long // astronomia counts westward, which is kinda backwards i guess
+  if ((lat > MAX_ABS_LAT) || (lat < -MAX_ABS_LAT)) {
+    throw new Error(`Latitude out of bounds: -${MAX_ABS_LAT} - ${MAX_ABS_LAT}: ${lat}`)
+  }
   const witchy = {}
+  // day info
+  let lookaroundLen = 4
+  // extremis -- days longer than seasons
+  const absLat = Math.abs(lat)
+  if (absLat > 60) {
+    lookaroundLen = 90
+  } else if (absLat > 70) {
+    lookaroundLen = 120
+  }
+  const lookbehind = [...new Array(lookaroundLen).keys()].slice(1).map(i => -1 * i).reverse()
+  const lookaround = [...lookbehind, ...new Array(lookaroundLen).keys()].map((i) => {
+    return new Sunrise(new Calendar(new Date(date.getTime() + (i * DAY_IN_MS))), lat, long)
+  })
+  const sunrise = lookaround.slice(0, lookbehind.length + 2) // most recent sunrise
+    .map((s) => s.rise().toDate())
+    .filter((d) => (d.getTime() - date.getTime()) < 0)
+    .toSorted((a, b) => b.getTime() - a.getTime())[0]
+  const sunset = lookaround.slice(lookbehind.length, lookbehind.length + lookaroundLen) // nearest sunset after sunrise
+    .map((s) => s.set())
+    .filter((s) => !!s)
+    .map((s) => s.toDate())
+    .filter((d) => (d.getTime() - sunrise.getTime()) > 0)
+    .toSorted((a, b) => a.getTime() - b.getTime())[0]
+  const nextSunrise = lookaround.slice(lookbehind.length) // nearest sunrise after sunset
+    .map((s) => s.rise())
+    .filter((s) => !!s)
+    .map((s) => s.toDate())
+    .filter((d) => (d.getTime() - sunset.getTime()) > 0)
+    .toSorted((a, b) => a.getTime() - b.getTime())[0]
+  witchy.day = {
+    rise: sunrise,
+    set: sunset,
+    next: nextSunrise
+  }
+  // time info
+  const dayLengthMs = witchy.day.next - witchy.day.rise
+  const dayHourLength = (witchy.day.set - witchy.day.rise) / 10 // ten sunlight hours
+  const nightHourLength = (witchy.day.next - witchy.day.set) / 10 // ten nighttime hours
+  let hour, minute, second
+  if ((witchy.day.set - date) < 0) {
+    // we're in night
+    const nightProgress = ((date - witchy.day.set) / nightHourLength)
+    hour = Math.floor(10 + nightProgress)
+    const rawMinutes = (nightProgress - Math.floor(nightProgress)).toString().split('.')[1].slice(0, 4)
+    minute = rawMinutes.slice(0, 2)
+    second = rawMinutes.slice(2, 4)
+  } else {
+    // we're in day
+    const dayProgress = ((date - witchy.day.rise) / dayHourLength)
+    hour = Math.floor(dayProgress)
+    const rem = (dayProgress - Math.floor(dayProgress)).toString()
+    if (rem.includes('.')) {
+      const rawMinutes = rem.split('.')[1].slice(0, 4)
+      minute = rawMinutes.slice(0, 2)
+      second = rawMinutes.slice(2, 4)
+    } else {
+      minute = '00'
+      second = '00'
+    }
+  }
+  witchy.time = {
+    hour,
+    minute: parseInt(minute, 10),
+    second: parseInt(second, 10),
+    dayHourLength: dayHourLength / HOUR_IN_MS,
+    nightHourLength: nightHourLength / HOUR_IN_MS,
+    str: `${hour}:${minute}:${second}`
+  }
   // season info
   const priorYear = new Date(date.getTime() - YEAR_IN_MS)
   const nextYear = new Date(date.getTime() + YEAR_IN_MS)
@@ -86,8 +159,8 @@ export function getDateInfo (date, lat, long) {
   const upcomingSeasonInfo = seasonDateInfo
     .filter(([_season, _date, delta]) => { return delta <= 0 })
     .toSorted((a, b) => b[2] - a[2])[0].slice(0, 2)
-  const currentSeasonDate = Math.ceil((date - currentSeasonInfo[1]) / DAY_IN_MS)
-  const daysLeftInSeason = Math.floor((upcomingSeasonInfo[1] - date) / DAY_IN_MS)
+  const currentSeasonDate = (date - currentSeasonInfo[1]) / dayLengthMs
+  const daysLeftInSeason = (upcomingSeasonInfo[1] - date) / dayLengthMs
   witchy.season = {
     current: currentSeasonInfo,
     upcoming: upcomingSeasonInfo,
@@ -107,8 +180,8 @@ export function getDateInfo (date, lat, long) {
   const upcomingPhaseInfo = phaseDateInfo
     .filter(([_phase, _date, delta]) => { return delta <= 0 })
     .toSorted((a, b) => b[2] - a[2])[0].slice(0, 2)
-  const currentPhaseDate = Math.ceil((date - currentPhaseInfo[1]) / DAY_IN_MS)
-  const daysLeftInPhase = Math.floor((upcomingPhaseInfo[1] - date) / DAY_IN_MS)
+  const currentPhaseDate = (date - currentPhaseInfo[1]) / dayLengthMs
+  const daysLeftInPhase = (upcomingPhaseInfo[1] - date) / dayLengthMs
   witchy.phase = {
     current: currentPhaseInfo,
     upcoming: upcomingPhaseInfo,
@@ -121,8 +194,8 @@ export function getDateInfo (date, lat, long) {
   const monthsSinceStart = Math.floor((date - firstMonthStart) / MONTH_IN_MS)
   const monthStart = new Date(firstMonthStart.getTime() + (MONTH_IN_MS * monthsSinceStart))
   const monthEnd = new Date(monthStart.getTime() + MONTH_IN_MS)
-  const daysSinceMonthStart = Math.ceil((date - monthStart) / DAY_IN_MS)
-  const daysLeftInMonth = Math.floor((monthEnd - date) / DAY_IN_MS)
+  const daysSinceMonthStart = Math.ceil((date - monthStart) / dayLengthMs)
+  const daysLeftInMonth = Math.floor((monthEnd - date) / dayLengthMs)
   let monthName
   if (monthsSinceStart === -1) {
     // are we in the nomad, or the corpse?
@@ -130,7 +203,7 @@ export function getDateInfo (date, lat, long) {
     const lastLastWinterSolstice = seasons.winter(priorPriorYear)
     const lastFirstMonthStart = phases.new(lastLastWinterSolstice)
     const n = Math.round((firstMonthStart - lastFirstMonthStart) / MONTH_IN_MS)
-    if (n == 12) {
+    if (n === 12) {
       monthName = MONTHS[MONTHS.length - 2]
     } else {
       monthName = MONTHS[MONTHS.length - 1]
@@ -146,47 +219,6 @@ export function getDateInfo (date, lat, long) {
     date: daysSinceMonthStart,
     rem: daysLeftInMonth
   }
-  // day info
-  const yesterday = new Sunrise(new Calendar(new Date(date - DAY_IN_MS)), lat, long)
-  const today = new Sunrise(new Calendar(new Date(date)), lat, long)
-  const sunrise = yesterday.rise().toDate()
-  const sunset = [yesterday.set(), today.set()]
-    .map((s) => s.toDate())
-    .toSorted((a, b) => a.getTime() - b.getTime())
-    [0]
-  const nextSunrise = today.rise().toDate()
-  witchy.day = {
-    rise: sunrise,
-    set: sunset,
-    next: nextSunrise
-  }
-  // time info
-  const dayHourLength = (witchy.day.set - witchy.day.rise) / 10 // ten sunlight hours
-  const nightHourLength = (witchy.day.next - witchy.day.set) / 10 // ten nighttime hours
-  let hour, minute, second
-  if ((date - witchy.day.rise) < 0) {
-    // we're in night
-    const nightProgress = ((date - witchy.day.set) / nightHourLength)
-    hour = Math.floor(10 + nightProgress)
-    const rawMinutes = (nightProgress - Math.floor(nightProgress)).toString().split('.')[1].slice(0, 4)
-    minute = rawMinutes.slice(0, 2)
-    second = rawMinutes.slice(2, 4)
-  } else {
-    // we're in day
-    const dayProgress = ((date - witchy.day.rise) / dayHourLength)
-    hour = Math.floor(dayProgress)
-    const rawMinutes = (dayProgress - Math.floor(dayProgress)).toString().split('.')[1].slice(0, 4)
-    minute = rawMinutes.slice(0, 2)
-    second = rawMinutes.slice(2, 4)
-  }
-  witchy.time = {
-    hour,
-    minute: parseInt(minute, 10),
-    second: parseInt(second, 10),
-    dayHourLength: dayHourLength / HOUR_IN_MS,
-    nightHourLength: nightHourLength / HOUR_IN_MS,
-    str: `${hour}:${minute}:${second}`
-  }
   return witchy
 }
 
@@ -197,11 +229,11 @@ function capitalize (s) {
 export function getDateText (date, lat, long) {
   const witchy = getDateInfo(date, lat, long)
   const txt = '' +
-    `It is day ${witchy.season.date} of ${capitalize(witchy.season.current[0])}, ${witchy.season.rem} til ${capitalize(witchy.season.upcoming[0])}.` +
+    `It is day ${Math.ceil(witchy.season.date)} of ${capitalize(witchy.season.current[0])}, ${Math.floor(witchy.season.rem)} til ${capitalize(witchy.season.upcoming[0])}.` +
     ' ' +
-    `It is day ${witchy.phase.date} of the ${capitalize(witchy.phase.current[0])} Moon, ${witchy.phase.rem} til ${capitalize(witchy.phase.upcoming[0])}.` +
+    `It is day ${Math.ceil(witchy.phase.date)} of the ${capitalize(witchy.phase.current[0])} Moon, ${Math.floor(witchy.phase.rem)} til ${capitalize(witchy.phase.upcoming[0])}.` +
     ' ' +
-    `It is day ${witchy.month.date} of the ${witchy.month.name}'s Moon, ${witchy.month.rem} til the ${capitalize(witchy.month.next)}'s.` +
+    `It is day ${Math.ceil(witchy.month.date)} of the ${witchy.month.name}'s Moon, ${Math.floor(witchy.month.rem)} til the ${capitalize(witchy.month.next)}'s.` +
     ' ' +
     `The current time is ${witchy.time.str}, or ${date.toLocaleTimeString()}.`
   return txt

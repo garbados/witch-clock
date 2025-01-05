@@ -1,6 +1,6 @@
 /* global describe, it */
 import * as assert from 'assert/strict'
-import { getDateInfo, SEASONS, PHASES, MONTHS } from './index.js'
+import { getDateInfo, SEASONS, PHASES, MONTHS, MAX_ABS_LAT } from './index.js'
 import * as fc from 'fast-check'
 
 function isDateValid (d) {
@@ -9,11 +9,11 @@ function isDateValid (d) {
 
 describe('witch-clock', function () {
   it('should handle arbitrary dates, latitudes, and longitudes', function () {
-    const baseOptions = { noNaN: true, noDefaultInfinity: true, }
+    const baseOptions = { noNaN: true, noDefaultInfinity: true }
     fc.assert(
       fc.property(
         fc.date({ noInvalidDate: true, min: new Date(1000, 0, 1), max: new Date(3000, 0, 1) }),
-        fc.float({ min: Math.fround(-89.6), max: Math.fround(89.6), ...baseOptions }),
+        fc.float({ min: Math.fround(-MAX_ABS_LAT), max: Math.fround(MAX_ABS_LAT), ...baseOptions }),
         fc.float({ min: Math.fround(-179.9), max: Math.fround(179.9), ...baseOptions }),
         (date, lat, long) => {
           const witchy = getDateInfo(date, lat, long)
@@ -42,11 +42,16 @@ describe('witch-clock', function () {
           assert.ok(witchy.month.date > 0)
           assert.ok(witchy.month.rem >= 0)
           // day checks
-          assert.ok(witchy.day.set - witchy.day.rise > 0)
-          assert.ok(witchy.day.next - witchy.day.set > 0)
+          assert.ok((witchy.day.set - witchy.day.rise) > 0)
+          assert.ok((witchy.day.next - witchy.day.set) > 0)
           // time checks
-          assert.ok(witchy.time.hour < 20)
-          assert.ok(witchy.time.hour >= 0)
+          if (witchy.time.hour >= 10) {
+            assert.ok((date - witchy.day.set) > 0)
+          } else {
+            assert.ok((date - witchy.day.set) <= 0)
+          }
+          assert.ok(witchy.time.hour <= 20, `More than 20 hours in a day: ${witchy.time.hour}.`)
+          assert.ok(witchy.time.hour >= 0, `Less than zero hours in a day: ${witchy.time.hour}.`)
           assert.ok(witchy.time.minute < 100)
           assert.ok(witchy.time.minute >= 0)
           assert.ok(witchy.time.second < 100)
