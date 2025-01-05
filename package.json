@@ -27,6 +27,7 @@
   "homepage": "https://github.com/garbados/witch-clock#readme",
   "devDependencies": {
     "esbuild": "^0.24.2",
+    "fast-check": "^3.23.2",
     "mocha": "^11.0.1",
     "sane": "^5.0.1",
     "serve": "^14.2.4",
