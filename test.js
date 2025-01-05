@@ -41,8 +41,16 @@ describe('witch-clock', function () {
           assert.ok(witchy.month.end.getTime() > witchy.month.start.getTime())
           assert.ok(witchy.month.date > 0)
           assert.ok(witchy.month.rem >= 0)
-          // TODO day checks
-          // TODO time checks
+          // day checks
+          assert.ok(witchy.day.set - witchy.day.rise > 0)
+          assert.ok(witchy.day.next - witchy.day.set > 0)
+          // time checks
+          assert.ok(witchy.time.hour < 20)
+          assert.ok(witchy.time.hour >= 0)
+          assert.ok(witchy.time.minute < 100)
+          assert.ok(witchy.time.minute >= 0)
+          assert.ok(witchy.time.second < 100)
+          assert.ok(witchy.time.second >= 0)
         }
       )
     )
