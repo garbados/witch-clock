@@ -44,3 +44,7 @@ Notable hours:
 - 15: midnight
 
 Compared to calendars which switch days overnight, this calendar switches in the morning at sunrise.
+
+### Extremis
+
+Particular conditions, like being at the North or South Poles, can cause days to be very long -- longer, sometimes, than a season! In these cases, dates are expressed as hours. Holidays are celebrated in the first hour.

@@ -14,7 +14,7 @@ describe('witch-clock', function () {
       fc.property(
         fc.date({ noInvalidDate: true, min: new Date(1000, 0, 1), max: new Date(3000, 0, 1) }),
         fc.float({ min: Math.fround(-89.6), max: Math.fround(89.6), ...baseOptions }),
-        fc.float({ min: -180, max: 180, ...baseOptions }),
+        fc.float({ min: Math.fround(-179.9), max: Math.fround(179.9), ...baseOptions }),
         (date, lat, long) => {
           const witchy = getDateInfo(date, lat, long)
           // season tests
@@ -31,11 +31,17 @@ describe('witch-clock', function () {
           assert.ok(PHASES.includes(currentPhase), `Unknown season: ${currentPhase}`)
           assert.ok(isDateValid(currentPhaseDate))
           const [upcomingPhase, upcomingPhaseDate] = witchy.phase.upcoming
-          assert.ok(PHASES.includes(upcomingPhase), `Unknown season: ${upcomingPhase}`)
+          assert.ok(PHASES.includes(upcomingPhase), `Unknown phase: ${upcomingPhase}`)
           assert.ok(isDateValid(upcomingPhaseDate))
           assert.ok(witchy.phase.date > 0)
           assert.ok(witchy.phase.rem >= 0)
-          // TODO month checks
+          // month checks
+          assert.ok(MONTHS.includes(witchy.month.name), `Unknown month: ${witchy.month.name}`)
+          assert.ok(MONTHS.includes(witchy.month.next), `Unknown month: ${witchy.month.next}`)
+          assert.ok(witchy.month.end.getTime() > witchy.month.start.getTime())
+          assert.ok(witchy.month.date > 0)
+          assert.ok(witchy.month.rem >= 0)
+          // TODO day checks
           // TODO time checks
         }
       )

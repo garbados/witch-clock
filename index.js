@@ -49,11 +49,7 @@ function getPhaseInfo (date) {
 
 function getSeasonInfo (date) {
   return Object.entries(seasons).map(([season, func]) => {
-    const yearStart = new Date(date.toLocaleDateString())
-    yearStart.setFullYear(date.getFullYear())
-    yearStart.setMonth(0)
-    yearStart.setDate(1 - moonphase.meanLunarMonth)
-    return [season, func(yearStart)]
+    return [season, func(new Date(date.toLocaleDateString()))]
   })
 }
 
@@ -80,8 +76,8 @@ export function getDateInfo (date, lat, long) {
   // season info
   const priorYear = new Date(date.getTime() - YEAR_IN_MS)
   const nextYear = new Date(date.getTime() + YEAR_IN_MS)
-  const seasonDateInfo = getSeasonInfo(date)
-    .concat(getSeasonInfo(priorYear))
+  const seasonDateInfo = getSeasonInfo(priorYear)
+    .concat(getSeasonInfo(date))
     .concat(getSeasonInfo(nextYear))
     .map(([season, seasonDate]) => [season, seasonDate, date - seasonDate])
   const currentSeasonInfo = seasonDateInfo
@@ -120,36 +116,49 @@ export function getDateInfo (date, lat, long) {
     rem: daysLeftInPhase
   }
   // month info
-  const firstMonthStart = phases.new(new Date(date.getFullYear(), 0, 1))
+  const lastWinterSolstice = seasons.winter(priorYear)
+  const firstMonthStart = phases.new(lastWinterSolstice)
   const monthsSinceStart = Math.floor((date - firstMonthStart) / MONTH_IN_MS)
   const monthStart = new Date(firstMonthStart.getTime() + (MONTH_IN_MS * monthsSinceStart))
   const monthEnd = new Date(monthStart.getTime() + MONTH_IN_MS)
   const daysSinceMonthStart = Math.ceil((date - monthStart) / DAY_IN_MS)
   const daysLeftInMonth = Math.floor((monthEnd - date) / DAY_IN_MS)
-  let nextMonth
-  if ((monthsSinceStart === 11) && witchy.season.current[0] === 'winter') {
-    nextMonth = MONTHS[0]
+  let monthName
+  if (monthsSinceStart === -1) {
+    // are we in the nomad, or the corpse?
+    const priorPriorYear = new Date(priorYear - YEAR_IN_MS)
+    const lastLastWinterSolstice = seasons.winter(priorPriorYear)
+    const lastFirstMonthStart = phases.new(lastLastWinterSolstice)
+    const n = Math.round((firstMonthStart - lastFirstMonthStart) / MONTH_IN_MS)
+    if (n == 12) {
+      monthName = MONTHS[MONTHS.length - 2]
+    } else {
+      monthName = MONTHS[MONTHS.length - 1]
+    }
   } else {
-    nextMonth = MONTHS[monthsSinceStart + 1] || MONTHS[0]
+    monthName = MONTHS[monthsSinceStart]
   }
   witchy.month = {
-    name: MONTHS[monthsSinceStart],
-    next: nextMonth,
+    name: monthName,
+    next: MONTHS[monthsSinceStart + 1],
     start: monthStart,
     end: monthEnd,
     date: daysSinceMonthStart,
     rem: daysLeftInMonth
   }
   // day info
-  const yesterday = new Date(date.getTime() - (DAY_IN_MS / 2))
-  const sunrise = new Sunrise(new Calendar(yesterday), lat, long)
-  const tomorrow = new Date(date)
-  tomorrow.setDate(date.getDate() + 1)
-  const nextSunrise = new Sunrise(new Calendar(tomorrow), lat, long)
+  const yesterday = new Sunrise(new Calendar(new Date(date - DAY_IN_MS)), lat, long)
+  const today = new Sunrise(new Calendar(new Date(date)), lat, long)
+  const sunrise = yesterday.rise().toDate()
+  const sunset = [yesterday.set(), today.set()]
+    .map((s) => s.toDate())
+    .toSorted((a, b) => a.getTime() - b.getTime())
+    [0]
+  const nextSunrise = today.rise().toDate()
   witchy.day = {
-    rise: sunrise.rise().toDate(),
-    set: sunrise.set().toDate(),
-    next: nextSunrise.rise().toDate()
+    rise: sunrise,
+    set: sunset,
+    next: nextSunrise
   }
   // time info
   const dayHourLength = (witchy.day.set - witchy.day.rise) / 10 // ten sunlight hours
@@ -174,6 +183,8 @@ export function getDateInfo (date, lat, long) {
     hour,
     minute: parseInt(minute, 10),
     second: parseInt(second, 10),
+    dayHourLength: dayHourLength / HOUR_IN_MS,
+    nightHourLength: nightHourLength / HOUR_IN_MS,
     str: `${hour}:${minute}:${second}`
   }
   return witchy
