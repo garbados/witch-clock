@@ -44,8 +44,8 @@ It is bad luck to work too hard on holidays, lest you outshine the moon.
 
 const JESTER = `
 Deep in the cold of Winter, we remember the purpose of joy.
-We tell stories and jokes, and share food and joy, because no long night nor frigid sky can prevent laughter,
-because we can carry mirth with us even into the darkest realms.
+We tell stories and jokes, and share food and laughter, because no long night nor frigid sky can prevent happiness.
+We can carry bright hearts into even the darkest realms.
 `.trim().split(/\n/g).join(' ')
 
 const WIZARD = `
