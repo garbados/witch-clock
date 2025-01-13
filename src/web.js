@@ -1,7 +1,7 @@
 /* global HTMLElement, customElements */
 import { witchify } from '../lib/nist'
 import { timeinfo } from '../lib/times'
-import { alchemize } from 'html-alchemist'
+import { alchemize, snag, listento } from 'html-alchemist'
 import { TITLE, HOW_IT_WORKS, REFLECTIONS, GEOLOCATION_ASK, CONCLUSION, SEASONS_WHAT, BUT_WHY, MONTHS_WHAT } from './text'
 import { explainHolidays, explainMonth, explainPhase, explainSeason, explainTime } from './explain'
 import { MONTHS, SEASONS } from '../lib/constants'
@@ -60,31 +60,41 @@ class WitchClock extends HTMLElement {
     if (this.task) clearInterval(this.task)
     let date = new Date()
     let witchy = await witchify(date, latitude, longitude)
+    let holidays = explainHolidays(witchy)
     let trying = false // CONCURRENCY
     console.log(witchy) // i left this here for you freaky console fuckers
+    // templates
+    const explainerstemplate = () => [
+      'ul',
+      ['li', explainSeason(witchy)],
+      ['li', explainPhase(witchy)],
+      ['li', explainMonth(witchy)],
+      ['li#current-time', explainTime(witchy)]
+    ]
+    const holidaystemplate = () => [
+      ['p', ['strong', 'Today\'s Holidays']],
+      ['ul', holidays.map(h => ['li', h])]
+    ]
+    // initial state
+    this.innerHTML = alchemize([
+      ...title('A lunisolar calendar.'),
+      ['div#explainers', explainerstemplate()],
+      ['div#holidays', holidaystemplate()]
+    ])
+    // refresh cycle
     const refresh = async () => {
       date = new Date()
       if (comesafter(date, witchy.day.next) && !trying) {
         trying = true
         witchy = await witchify(date, latitude, longitude)
+        holidays = explainHolidays(witchy)
+        snag('explainers').innerHTML = alchemize(explainerstemplate())
+        if (holidays) snag('holidays').innerHTML = alchemize(holidaystemplate())
         trying = false
       } else {
         witchy.time = timeinfo(date, witchy.day)
-        witchy.now = date
+        snag('current-time').innerHTML = alchemize(explainTime(witchy))
       }
-      const holidays = explainHolidays(witchy)
-      this.innerHTML = alchemize([
-        ...title('A lunisolar calendar.'),
-        ['ul',
-          ['li', explainSeason(witchy)],
-          ['li', explainPhase(witchy)],
-          ['li', explainMonth(witchy)],
-          ['li', explainTime(witchy)]
-        ],
-        holidays
-          ? [['p', ['strong', 'Today\'s Holidays']], ['ul', holidays.map(h => ['li', h])]]
-          : ''
-      ])
     }
     try {
       await refresh()
@@ -105,8 +115,7 @@ class WitchClock extends HTMLElement {
       ['input#geo-permission', { type: 'button', value: 'OK!' }]
     ])
     this.enterCustomLatlong()
-    const node = document.getElementById('geo-permission')
-    node.addEventListener('click', async () => {
+    listento('geo-permission', 'click', async () => {
       this.loading()
       const timeout = setTimeout(() => this.generalError({ message: 'Timeout' }), 10000)
       try {
@@ -127,11 +136,10 @@ class WitchClock extends HTMLElement {
       ['input#geo-longitude', options],
       ['input#geo-custom', { type: 'button', value: 'OK!' }]
     ])
-    const node = document.getElementById('geo-custom')
-    node.addEventListener('click', async () => {
+    listento('geo-custom', 'click', async () => {
       try {
-        const { value: latstr } = document.getElementById('geo-latitude')
-        const { value: lonstr } = document.getElementById('geo-longitude')
+        const { value: latstr } = snag('geo-latitude')
+        const { value: lonstr } = snag('geo-longitude')
         const latitude = parseInt(latstr, 10) || 0
         const longitude = parseInt(lonstr, 10) || 0
         await this.beginTicking({ latitude, longitude })
@@ -146,6 +154,7 @@ class WitchClock extends HTMLElement {
       ...title('... could not obtain your permission!'),
       ['p', error.message]
     ])
+    this.enterCustomLatlong()
   }
 
   generalError (error) {
@@ -154,6 +163,7 @@ class WitchClock extends HTMLElement {
       ...title('... encountered an unknown problem!'),
       ['p', error.message]
     ])
+    this.enterCustomLatlong()
   }
 
   disconnectedCallback () {
