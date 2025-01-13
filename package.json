@@ -11,7 +11,7 @@
   "scripts": {
     "test": "standard && mocha",
     "build": "rollup --config rollup.config.js",
-    "release": "npm run build && terser www/web.js -c -m -o www/web.min.js",
+    "release": "npm run build && terser www/web.js -c -m -o www/web.js",
     "watch": "sane \"npm run build\" . --glob={lib,src}/*.js",
     "serve": "serve www",
     "dev": "run-p watch serve",

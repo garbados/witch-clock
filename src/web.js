@@ -24,6 +24,19 @@ const heading = x => [
 
 const p = s => ['p', s]
 
+const explanation = (witchy) => [
+  'ul',
+  ['li', explainSeason(witchy)],
+  ['li', explainPhase(witchy)],
+  ['li', explainMonth(witchy)],
+  ['li#current-time', explainTime(witchy)]
+]
+
+const todayholidays = (holidays) => [
+  ['p', ['strong', 'Today\'s Holidays']],
+  ['ul', holidays.map(h => ['li', h])]
+]
+
 // GEOLOCATION
 
 async function getCurrentPosition () {
@@ -63,23 +76,11 @@ class WitchClock extends HTMLElement {
     let holidays = explainHolidays(witchy)
     let trying = false // CONCURRENCY
     console.log(witchy) // i left this here for you freaky console fuckers
-    // templates
-    const explainerstemplate = () => [
-      'ul',
-      ['li', explainSeason(witchy)],
-      ['li', explainPhase(witchy)],
-      ['li', explainMonth(witchy)],
-      ['li#current-time', explainTime(witchy)]
-    ]
-    const holidaystemplate = () => [
-      ['p', ['strong', 'Today\'s Holidays']],
-      ['ul', holidays.map(h => ['li', h])]
-    ]
     // initial state
     this.innerHTML = alchemize([
       ...title('A lunisolar calendar.'),
-      ['div#explainers', explainerstemplate()],
-      ['div#holidays', holidaystemplate()]
+      ['div#explainers', explanation(witchy)],
+      ['div#holidays', todayholidays(holidays)]
     ])
     // refresh cycle
     const refresh = async () => {
@@ -88,11 +89,12 @@ class WitchClock extends HTMLElement {
         trying = true
         witchy = await witchify(date, latitude, longitude)
         holidays = explainHolidays(witchy)
-        snag('explainers').innerHTML = alchemize(explainerstemplate())
-        if (holidays) snag('holidays').innerHTML = alchemize(holidaystemplate())
+        snag('explainers').innerHTML = alchemize(explanation(witchy))
+        if (holidays) snag('holidays').innerHTML = alchemize(todayholidays(holidays))
         trying = false
       } else {
         witchy.time = timeinfo(date, witchy.day)
+        witchy.now = date
         snag('current-time').innerHTML = alchemize(explainTime(witchy))
       }
     }
