@@ -33,8 +33,10 @@ const explanation = (witchy) => [
 ]
 
 const todayholidays = (holidays) => [
-  ['p', ['strong', 'Today\'s Holidays']],
-  ['ul', holidays.map(h => ['li', h])]
+  holidays
+  ? [['p', ['strong', 'Today\'s Holidays']],
+     ['ul', holidays.map(h => ['li', h])]]
+  : ''
 ]
 
 // GEOLOCATION

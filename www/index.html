@@ -7,6 +7,15 @@
         <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@2.0.6/css/pico.min.css">
         <link rel="shortcut icon" type="image/png" href="./favicon.ico"/>
         <script type="module" src="./web.js"></script>
+        <!-- DEBUGGING -->
+        <script>
+            ;(function () {
+                var src = '//cdn.jsdelivr.net/npm/eruda';
+                if (!/eruda=true/.test(window.location) && localStorage.getItem('active-eruda') !== 'true') return;
+                document.write('<scr' + 'ipt src="' + src + '"></scr' + 'ipt>');
+                document.write('<scr' + 'ipt>eruda.init();</scr' + 'ipt>');
+            })();
+        </script>
     </head>
     <body>
         <header></header>
