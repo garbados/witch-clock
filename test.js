@@ -96,7 +96,7 @@ describe('witch-clock', function () {
   })
 
   it('should use a remote source ok', async function () {
-    this.timeout(5000)
+    this.timeout(0) // the web is slow
     const datetime = new Date()
     const witchy = await nistify(datetime, 0, 0)
     await testwitchy(datetime, witchy)
