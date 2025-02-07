@@ -136,18 +136,17 @@ class WitchClock extends HTMLElement {
 
   enterCustomLatlong () {
     const options = { type: 'text', inputmode: 'decimal' }
-    const latitude = this.getCustomLatlongValue('latitude')
-    const longitude = this.getCustomLatlongValue('longitude')
+    const coordinates = this.getCustomCoordinates()
     this.innerHTML += alchemize([
       ['p', 'Or, you can enter a custom latitude and longitude.'],
-      ['input#geo-latitude', { ...options, value: latitude }],
-      ['input#geo-longitude', { ...options, value: longitude }],
+      ['input#geo-latitude', { ...options, value: coordinates.latitude }],
+      ['input#geo-longitude', { ...options, value: coordinates.longitude }],
       ['fieldset',
         ['label',
           { for: 'geo-remember' },
           ['input#geo-remember', { 
             type: 'checkbox',
-            checked: this.getCustomLatlong().exists
+            checked: coordinates.remembered
           }],
           'Remember location locally'
         ]
@@ -162,12 +161,12 @@ class WitchClock extends HTMLElement {
         const longitude = parseInt(lonstr, 10) || 0
         const remember = snag('geo-remember').checked
         if (remember) {
-          this.rememberCustomLatlong({
+          this.rememberCustomCoordinates({
             'latitude': latitude,
             'longitude': longitude
           })
         } else {
-          this.forgetCustomLatlong()
+          this.forgetCustomCoordinates()
         }
         await this.beginTicking({ latitude, longitude })
       } catch (e) {
@@ -176,34 +175,32 @@ class WitchClock extends HTMLElement {
     })
   }
   
-  getCustomLatlong() {
+  getCustomCoordinates() {
+    const defaultValue = 0
     const latitude = localStorage?.getItem('latitude')
     const longitude = localStorage?.getItem('longitude')
     
     if (!latitude) {
       return {
-        'exists': false
+        'remembered': false,
+        'latitude': defaultValue,
+        'longitude': defaultValue
       }
     }
     
     return {
-      'exists': true,
+      'remembered': true,
       'latitude': latitude,
       'longitude': longitude
-    }
+    } 
   }
   
-  getCustomLatlongValue(key) {
-    const data = this.getCustomLatlong()
-    return data?.exists ? data[key] : 0
-  }
-  
-  rememberCustomLatlong(data) {
+  rememberCustomCoordinates(data) {
     localStorage.setItem('latitude', data.latitude)
     localStorage.setItem('longitude', data.longitude)
   }
   
-  forgetCustomLatlong() {
+  forgetCustomCoordinates() {
     localStorage.removeItem('latitude')
     localStorage.removeItem('longitude')
   }
