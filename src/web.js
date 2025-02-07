@@ -139,7 +139,9 @@ class WitchClock extends HTMLElement {
     const coordinates = this.getCustomCoordinates()
     this.innerHTML += alchemize([
       ['p', 'Or, you can enter a custom latitude and longitude.'],
+      ['label', { for: "geo-latitude" }, 'Latitude'],
       ['input#geo-latitude', { ...options, value: coordinates.latitude }],
+      ['label', { for: "geo-longitude" }, 'Longitude'],
       ['input#geo-longitude', { ...options, value: coordinates.longitude }],
       ['fieldset',
         ['label',
