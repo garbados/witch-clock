@@ -138,7 +138,9 @@ class WitchClock extends HTMLElement {
     const options = { type: 'text', inputmode: 'decimal', value: 0 }
     this.innerHTML += alchemize([
       ['p', 'Or, you can enter a custom latitude and longitude.'],
+      ['label', { for: "geo-latitude" }, 'Latitude'],
       ['input#geo-latitude', options],
+      ['label', { for: "geo-longitude" }, 'Longitude'],
       ['input#geo-longitude', options],
       ['input#geo-custom', { type: 'button', value: 'OK!' }]
     ])
