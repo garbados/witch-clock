@@ -135,13 +135,24 @@ class WitchClock extends HTMLElement {
   }
 
   enterCustomLatlong () {
-    const options = { type: 'text', inputmode: 'decimal', value: 0 }
+    const options = { type: 'text', inputmode: 'decimal' }
+    const coordinates = this.getCustomCoordinates()
     this.innerHTML += alchemize([
       ['p', 'Or, you can enter a custom latitude and longitude.'],
       ['label', { for: "geo-latitude" }, 'Latitude'],
-      ['input#geo-latitude', options],
+      ['input#geo-latitude', { ...options, value: coordinates.latitude }],
       ['label', { for: "geo-longitude" }, 'Longitude'],
-      ['input#geo-longitude', options],
+      ['input#geo-longitude', { ...options, value: coordinates.longitude }],
+      ['fieldset',
+        ['label',
+          { for: 'geo-remember' },
+          ['input#geo-remember', { 
+            type: 'checkbox',
+            checked: coordinates.remembered
+          }],
+          'Remember location locally'
+        ]
+      ],
       ['input#geo-custom', { type: 'button', value: 'OK!' }]
     ])
     listento('geo-custom', 'click', async () => {
@@ -150,11 +161,50 @@ class WitchClock extends HTMLElement {
         const { value: lonstr } = snag('geo-longitude')
         const latitude = parseInt(latstr, 10) || 0
         const longitude = parseInt(lonstr, 10) || 0
+        const remember = snag('geo-remember').checked
+        if (remember) {
+          this.rememberCustomCoordinates({
+            'latitude': latitude,
+            'longitude': longitude
+          })
+        } else {
+          this.forgetCustomCoordinates()
+        }
         await this.beginTicking({ latitude, longitude })
       } catch (e) {
         this.generalError(e)
       }
     })
+  }
+  
+  getCustomCoordinates() {
+    const defaultValue = 0
+    const latitude = localStorage?.getItem('latitude')
+    const longitude = localStorage?.getItem('longitude')
+    
+    if (!latitude) {
+      return {
+        'remembered': false,
+        'latitude': defaultValue,
+        'longitude': defaultValue
+      }
+    }
+    
+    return {
+      'remembered': true,
+      'latitude': latitude,
+      'longitude': longitude
+    } 
+  }
+  
+  rememberCustomCoordinates(data) {
+    localStorage.setItem('latitude', data.latitude)
+    localStorage.setItem('longitude', data.longitude)
+  }
+  
+  forgetCustomCoordinates() {
+    localStorage.removeItem('latitude')
+    localStorage.removeItem('longitude')
   }
 
   userDeniedPermission (error) {
