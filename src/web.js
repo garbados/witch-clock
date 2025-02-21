@@ -41,7 +41,8 @@ const todayholidays = (holidays) => [
     : ''
 ]
 
-const GEO_REMEMBER = ['fieldset',
+const GEO_REMEMBER = [
+  'fieldset',
   ['label',
     { for: 'geo-remember' },
     ['input#geo-remember', {
