@@ -53,123 +53,178 @@ async function getCurrentPosition () {
   })
 }
 
+async function saveCurrentPosition ({ latitude, longitude }) {
+  localStorage.setItem('_witchy_latlong', JSON.stringify([latitude, longitude]))
+}
+
+async function recallCurrentPosition () {
+  const s = localStorage.getItem('_witchy_latlong')
+  if (s) {
+    const [latitude, longitude] = JSON.parse(s)
+    return { latitude, longitude }
+  }
+}
+
+async function fetchCurrentPosition () {
+  const { coords } = await getCurrentPosition()
+  await saveCurrentPosition(coords)
+  return coords
+}
+
+// VIEWS
+
+function loading () {
+  this.innerHTML = alchemize(title('... is loading!'))
+}
+
+function askForPermission () {
+  this.innerHTML = alchemize([
+    ...title('... needs your permission!'),
+    GEOLOCATION_ASK.map(p),
+    ['input#geo-permission', { type: 'button', value: 'OK!' }]
+  ])
+  enterCustomLatlong.call(this)
+  listento('geo-permission', 'click', async () => {
+    loading.call(this)
+    const timeout = setTimeout(() => generalError.call(this, { message: 'Timeout' }), 10000)
+    try {
+      const coords = await fetchCurrentPosition()
+      beginTicking.call(this, coords)
+    } catch (e) {
+      userDeniedPermission.call(this, e)
+    }
+    clearTimeout(timeout)
+  })
+}
+
+function enterCustomLatlong () {
+  const options = { type: 'text', inputmode: 'decimal', value: 0 }
+  this.innerHTML += alchemize([
+    ['p', 'Or, you can enter a custom latitude and longitude.'],
+    ['input#geo-latitude', options],
+    ['input#geo-longitude', options],
+    ['input#geo-custom', { type: 'button', value: 'OK!' }],
+    ['input#where-am-i', { type: 'button', value: 'Reset location with GPS' }]
+  ])
+  listento('geo-custom', 'click', async () => {
+    try {
+      const { value: latstr } = snag('geo-latitude')
+      const { value: lonstr } = snag('geo-longitude')
+      if (this.task) clearInterval(this.task)
+      loading.call(this)
+      const latitude = parseInt(latstr, 10) || 0
+      const longitude = parseInt(lonstr, 10) || 0
+      await saveCurrentPosition({ latitude, longitude })
+      window.scroll(0, 0)
+      await beginTicking.call(this, { latitude, longitude })
+    } catch (e) {
+      window.scroll(0, 0)
+      generalError.call(this, e)
+    }
+  })
+  listento('where-am-i', 'click', async () => {
+    try {
+      if (this.task) clearInterval(this.task)
+      loading.call(this)
+      const { latitude, longitude } = await fetchCurrentPosition()
+      window.scroll(0, 0)
+      await beginTicking.call(this, { latitude, longitude })
+    } catch (e) {
+      window.scroll(0, 0)
+      generalError.call(this, e)
+    }
+  })
+}
+
+function userDeniedPermission (error) {
+  this.innerHTML = alchemize([
+    ...title('... could not obtain your permission!'),
+    ['p', error.message]
+  ])
+  enterCustomLatlong.call(this)
+}
+
+function generalError (error) {
+  console.trace(error)
+  this.innerHTML = alchemize([
+    ...title('... encountered an unknown problem!'),
+    ['p', error.message]
+  ])
+  enterCustomLatlong.call(this)
+}
+
+// DA GUTZ
+
+async function beginTicking ({ latitude, longitude }) {
+  if (this.task) clearInterval(this.task)
+  let date = new Date()
+  let witchy = await witchify(date, latitude, longitude)
+  console.log(witchy) // i left this here for you freaky console fuckers
+  let holidays = explainHolidays(witchy)
+  let trying = false // CONCURRENCY
+  // initial state
+  this.innerHTML = alchemize([
+    ...title('A lunisolar calendar.'),
+    ['div#explainers', explanation(witchy)],
+    ['div#holidays', todayholidays(holidays)],
+    ['p', `Reporting on position:`],
+    ['ul',
+      ['li', `Latitude: ${latitude}`],
+      ['li', `Longitude: ${longitude}`]
+    ]
+  ])
+  enterCustomLatlong.call(this)
+  // refresh cycle
+  const refresh = async () => {
+    date = new Date()
+    if (comesafter(date, witchy.day.next) && !trying) {
+      trying = true
+      witchy = await witchify(date, latitude, longitude)
+      holidays = explainHolidays(witchy)
+      snag('explainers').innerHTML = alchemize(explanation(witchy))
+      if (holidays) snag('holidays').innerHTML = alchemize(todayholidays(holidays))
+      trying = false
+    } else {
+      witchy.time = timeinfo(date, witchy.day)
+      witchy.now = date
+      snag('current-time').innerHTML = alchemize(explainTime(witchy))
+    }
+  }
+  try {
+    await refresh()
+    this.task = setInterval(refresh, 1000)
+  } catch (e) {
+    generalError.call(this, e)
+  }
+}
+
 // WITCH CLOCK
 
 class WitchClock extends HTMLElement {
   async connectedCallback () {
-    this.loading()
-    const permission = await navigator.permissions.query({
-      name: 'geolocation'
-    })
-    if (permission.state === 'granted') {
-      try {
-        const { coords } = await getCurrentPosition()
-        await this.beginTicking(coords)
-      } catch (e) {
-        this.generalError(e)
-      }
-    } else {
-      this.askForPermission()
-    }
-  }
-
-  async beginTicking ({ latitude, longitude }) {
-    if (this.task) clearInterval(this.task)
-    let date = new Date()
-    let witchy = await witchify(date, latitude, longitude)
-    let holidays = explainHolidays(witchy)
-    let trying = false // CONCURRENCY
-    console.log(witchy) // i left this here for you freaky console fuckers
-    // initial state
-    this.innerHTML = alchemize([
-      ...title('A lunisolar calendar.'),
-      ['div#explainers', explanation(witchy)],
-      ['div#holidays', todayholidays(holidays)]
-    ])
-    // refresh cycle
-    const refresh = async () => {
-      date = new Date()
-      if (comesafter(date, witchy.day.next) && !trying) {
-        trying = true
-        witchy = await witchify(date, latitude, longitude)
-        holidays = explainHolidays(witchy)
-        snag('explainers').innerHTML = alchemize(explanation(witchy))
-        if (holidays) snag('holidays').innerHTML = alchemize(todayholidays(holidays))
-        trying = false
-      } else {
-        witchy.time = timeinfo(date, witchy.day)
-        witchy.now = date
-        snag('current-time').innerHTML = alchemize(explainTime(witchy))
-      }
-    }
+    loading.call(this)
     try {
-      await refresh()
-      this.task = setInterval(refresh, 1000)
+      const recalled = await recallCurrentPosition()
+      if (recalled) {
+        await beginTicking.call(this, recalled)
+      } else {
+        const permission = await navigator.permissions.query({
+          name: 'geolocation'
+        })
+        if (permission.state === 'granted') {
+          try {
+            const coords = await fetchCurrentPosition()
+            await beginTicking.call(this, coords)
+          } catch (e) {
+            generalError.call(this, e)
+          }
+        } else {
+          askForPermission.call(this)
+        }
+      }
     } catch (e) {
-      this.generalError(e)
+      generalError.call(this, e)
     }
-  }
-
-  loading () {
-    this.innerHTML = alchemize(title('... is loading!'))
-  }
-
-  askForPermission () {
-    this.innerHTML = alchemize([
-      ...title('... needs your permission!'),
-      GEOLOCATION_ASK.map(p),
-      ['input#geo-permission', { type: 'button', value: 'OK!' }]
-    ])
-    this.enterCustomLatlong()
-    listento('geo-permission', 'click', async () => {
-      this.loading()
-      const timeout = setTimeout(() => this.generalError({ message: 'Timeout' }), 10000)
-      try {
-        const { coords } = await getCurrentPosition()
-        this.beginTicking(coords)
-      } catch (e) {
-        this.userDeniedPermission(e)
-      }
-      clearTimeout(timeout)
-    })
-  }
-
-  enterCustomLatlong () {
-    const options = { type: 'text', inputmode: 'decimal', value: 0 }
-    this.innerHTML += alchemize([
-      ['p', 'Or, you can enter a custom latitude and longitude.'],
-      ['input#geo-latitude', options],
-      ['input#geo-longitude', options],
-      ['input#geo-custom', { type: 'button', value: 'OK!' }]
-    ])
-    listento('geo-custom', 'click', async () => {
-      try {
-        const { value: latstr } = snag('geo-latitude')
-        const { value: lonstr } = snag('geo-longitude')
-        const latitude = parseInt(latstr, 10) || 0
-        const longitude = parseInt(lonstr, 10) || 0
-        await this.beginTicking({ latitude, longitude })
-      } catch (e) {
-        this.generalError(e)
-      }
-    })
-  }
-
-  userDeniedPermission (error) {
-    this.innerHTML = alchemize([
-      ...title('... could not obtain your permission!'),
-      ['p', error.message]
-    ])
-    this.enterCustomLatlong()
-  }
-
-  generalError (error) {
-    console.trace(error)
-    this.innerHTML = alchemize([
-      ...title('... encountered an unknown problem!'),
-      ['p', error.message]
-    ])
-    this.enterCustomLatlong()
   }
 
   disconnectedCallback () {
