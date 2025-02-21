@@ -1,4 +1,4 @@
-/* global HTMLElement, customElements */
+/* global HTMLElement, customElements, localStorage */
 import { witchify } from '../lib/nist'
 import { timeinfo } from '../lib/times'
 import { alchemize, snag, listento } from 'html-alchemist'
@@ -182,7 +182,7 @@ async function beginTicking ({ latitude, longitude, remembered }) {
     ...title('A lunisolar calendar.'),
     ['div#explainers', explanation(witchy)],
     ['div#holidays', todayholidays(holidays)],
-    ['p', `Reporting on position:`],
+    ['p', 'Reporting on position:'],
     ['ul',
       ['li', `Latitude: ${latitude}`],
       ['li', `Longitude: ${longitude}`]
