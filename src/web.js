@@ -41,6 +41,17 @@ const todayholidays = (holidays) => [
     : ''
 ]
 
+const GEO_REMEMBER = ['fieldset',
+  ['label',
+    { for: 'geo-remember' },
+    ['input#geo-remember', {
+      type: 'checkbox',
+      checked: true
+    }],
+    'Remember location locally'
+  ]
+]
+
 // GEOLOCATION
 
 async function getCurrentPosition () {
@@ -53,22 +64,20 @@ async function getCurrentPosition () {
   })
 }
 
-async function saveCurrentPosition ({ latitude, longitude }) {
-  localStorage.setItem('_witchy_latlong', JSON.stringify([latitude, longitude]))
+async function saveCurrentPosition ({ latitude, longitude, remembered }) {
+  localStorage.setItem('_witchy_latlong', JSON.stringify({ latitude, longitude, remembered }))
 }
 
 async function recallCurrentPosition () {
   const s = localStorage.getItem('_witchy_latlong')
-  if (s) {
-    const [latitude, longitude] = JSON.parse(s)
-    return { latitude, longitude }
-  }
+  if (s) return JSON.parse(s)
 }
 
-async function fetchCurrentPosition () {
-  const { coords } = await getCurrentPosition()
-  await saveCurrentPosition(coords)
-  return coords
+async function fetchCurrentPosition (remembered) {
+  const { coords: { latitude, longitude } } = await getCurrentPosition()
+  const position = { latitude, longitude, remembered }
+  if (remembered) await saveCurrentPosition(position)
+  return position
 }
 
 // VIEWS
@@ -81,14 +90,16 @@ function askForPermission () {
   this.innerHTML = alchemize([
     ...title('... needs your permission!'),
     GEOLOCATION_ASK.map(p),
+    GEO_REMEMBER,
     ['input#geo-permission', { type: 'button', value: 'OK!' }]
   ])
   enterCustomLatlong.call(this)
   listento('geo-permission', 'click', async () => {
+    const remembered = snag('geo-remember').checked
     loading.call(this)
     const timeout = setTimeout(() => generalError.call(this, { message: 'Timeout' }), 10000)
     try {
-      const coords = await fetchCurrentPosition()
+      const coords = await fetchCurrentPosition(remembered)
       beginTicking.call(this, coords)
     } catch (e) {
       userDeniedPermission.call(this, e)
@@ -97,12 +108,13 @@ function askForPermission () {
   })
 }
 
-function enterCustomLatlong () {
+function enterCustomLatlong (remembered) {
   const options = { type: 'text', inputmode: 'decimal', value: 0 }
   this.innerHTML += alchemize([
     ['p', 'Or, you can enter a custom latitude and longitude.'],
     ['input#geo-latitude', options],
     ['input#geo-longitude', options],
+    GEO_REMEMBER,
     ['input#geo-custom', { type: 'button', value: 'OK!' }],
     ['input#where-am-i', { type: 'button', value: 'Reset location with GPS' }]
   ])
@@ -110,13 +122,14 @@ function enterCustomLatlong () {
     try {
       const { value: latstr } = snag('geo-latitude')
       const { value: lonstr } = snag('geo-longitude')
+      const remembered = snag('geo-remember').checked
       if (this.task) clearInterval(this.task)
       loading.call(this)
       const latitude = parseInt(latstr, 10) || 0
       const longitude = parseInt(lonstr, 10) || 0
-      await saveCurrentPosition({ latitude, longitude })
+      await saveCurrentPosition({ latitude, longitude, remembered })
       window.scroll(0, 0)
-      await beginTicking.call(this, { latitude, longitude })
+      await beginTicking.call(this, { latitude, longitude, remembered })
     } catch (e) {
       window.scroll(0, 0)
       generalError.call(this, e)
@@ -124,11 +137,12 @@ function enterCustomLatlong () {
   })
   listento('where-am-i', 'click', async () => {
     try {
+      const remembered = snag('geo-remember').checked
       if (this.task) clearInterval(this.task)
       loading.call(this)
-      const { latitude, longitude } = await fetchCurrentPosition()
+      const { latitude, longitude } = await fetchCurrentPosition(remembered)
       window.scroll(0, 0)
-      await beginTicking.call(this, { latitude, longitude })
+      await beginTicking.call(this, { latitude, longitude, remembered })
     } catch (e) {
       window.scroll(0, 0)
       generalError.call(this, e)
@@ -155,7 +169,7 @@ function generalError (error) {
 
 // DA GUTZ
 
-async function beginTicking ({ latitude, longitude }) {
+async function beginTicking ({ latitude, longitude, remembered }) {
   if (this.task) clearInterval(this.task)
   let date = new Date()
   let witchy = await witchify(date, latitude, longitude)
@@ -173,7 +187,7 @@ async function beginTicking ({ latitude, longitude }) {
       ['li', `Longitude: ${longitude}`]
     ]
   ])
-  enterCustomLatlong.call(this)
+  enterCustomLatlong.call(this, remembered)
   // refresh cycle
   const refresh = async () => {
     date = new Date()
