@@ -10,7 +10,7 @@ export const HOW_IT_WORKS = `
 A season is the time between the nearest solstice and equinox. There are four seasons: Winter, Spring, Summer, and Autumn.
 Festivals are celebrated on the first day of each season.
 A month is a lunar month, so there are either 12 or 13 months in a year.
-The lunar cycle begins on the first new moon after the winter solstice, beginning with the Jester's Moon.
+The lunar cycle begins on the first new moon after the winter solstice (summer solstice, in the southern hemisphere), beginning with the Jester's Moon.
 Each month contains four phases of the moon: New, Waxing, Full, Waning.
 Feasts are celebrated on the first day of the full moon of each month.
 Conclusions are celebrated on the last day of each cycle, either the Return or the Demise.

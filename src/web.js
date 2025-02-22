@@ -24,22 +24,21 @@ const heading = x => [
 
 const p = s => ['p', s]
 
-const explanation = (witchy) => [
+const explanation = (witchy, southern = false) => [
   'ul',
-  ['li', explainSeason(witchy)],
+  ['li', explainSeason(witchy, southern)],
   ['li', explainPhase(witchy)],
   ['li', explainMonth(witchy)],
   ['li#current-time', explainTime(witchy)]
 ]
 
-const todayholidays = (holidays) => [
+const todayholidays = (holidays) =>
   holidays
     ? [
         ['p', ['strong', 'Today\'s Holidays']],
         ['ul', holidays.map(h => ['li', h])]
       ]
     : ''
-]
 
 const GEO_REMEMBER = [
   'fieldset',
@@ -126,8 +125,8 @@ function enterCustomLatlong (remembered) {
       const remembered = snag('geo-remember').checked
       if (this.task) clearInterval(this.task)
       loading.call(this)
-      const latitude = parseInt(latstr, 10) || 0
-      const longitude = parseInt(lonstr, 10) || 0
+      const latitude = parseFloat(latstr, 10) || 0
+      const longitude = parseFloat(lonstr, 10) || 0
       await saveCurrentPosition({ latitude, longitude, remembered })
       window.scroll(0, 0)
       await beginTicking.call(this, { latitude, longitude, remembered })
@@ -180,7 +179,7 @@ async function beginTicking ({ latitude, longitude, remembered }) {
   // initial state
   this.innerHTML = alchemize([
     ...title('A lunisolar calendar.'),
-    ['div#explainers', explanation(witchy)],
+    ['div#explainers', explanation(witchy, (latitude < 0))],
     ['div#holidays', todayholidays(holidays)],
     ['p', 'Reporting on position:'],
     ['ul',

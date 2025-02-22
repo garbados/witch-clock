@@ -1,11 +1,13 @@
 import { REFLECTIONS } from './text'
-import { CONCLUSIONS, CORPSE, FULL, NOMAD } from '../lib/constants'
+import { CONCLUSIONS, CORPSE, FULL, NOMAD, SEASONS, SNOSAES } from '../lib/constants'
 
-export function explainSeason (witchy) {
+export function explainSeason (witchy, southern = false) {
   const parts = []
-  const thisseason = witchy.season.current[0]
+  let thisseason = witchy.season.current[0]
+  if (southern) thisseason = SNOSAES[SEASONS.indexOf(thisseason)]
   const since = witchy.season.current[2]
-  const nextseason = witchy.season.upcoming[0]
+  let nextseason = witchy.season.upcoming[0]
+  if (southern) nextseason = SNOSAES[SEASONS.indexOf(nextseason)]
   const until = witchy.season.upcoming[2]
   parts.push(`It is day ${Math.ceil(since)} of ${thisseason};`)
   const tilNextSeason = Math.ceil(until)
