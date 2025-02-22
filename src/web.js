@@ -4,7 +4,7 @@ import { timeinfo } from '../lib/times'
 import { alchemize, snag, listento } from 'html-alchemist'
 import { TITLE, HOW_IT_WORKS, REFLECTIONS, GEOLOCATION_ASK, CONCLUSION, SEASONS_WHAT, BUT_WHY, MONTHS_WHAT } from './text'
 import { explainHolidays, explainMonth, explainPhase, explainSeason, explainTime } from './explain'
-import { MONTHS, SEASONS, SNOSAES } from '../lib/constants'
+import { MONTHS, SEASONS, SNOSAES, SEASON_EMOJIS, PHASE_EMOJIS } from '../lib/constants'
 import { comesafter } from '../lib/utils'
 
 // POTIONS
@@ -174,10 +174,11 @@ const explaingrid = (witchy, southern = false) => {
   if (southern) thisseason = SNOSAES[SEASONS.indexOf(thisseason)]
   const seasonsince = witchy.season.current[2]
   const seasonuntil = witchy.season.upcoming[2]
+  const seasonemoji = SEASON_EMOJIS[thisseason]
   const thisphase = witchy.moon.current[0]
   const phasesince = witchy.moon.current[2]
   const phaseuntil = witchy.moon.upcoming[2]
-
+  const phaseemoji = PHASE_EMOJIS[thisphase]
   const thismonth = witchy.month.current[0]
   const monthsince = witchy.month.current[2]
   const nextmonth = witchy.month.upcoming[0]
@@ -185,8 +186,8 @@ const explaingrid = (witchy, southern = false) => {
   return [
     'div.grid',
     { style: 'text-align: center;' },
-    ['div', ['article', `${thisseason} ${Math.ceil(seasonsince)} / ${Math.ceil(seasonsince + seasonuntil)}`]],
-    ['div', ['article', `${thisphase} ${Math.ceil(phasesince)} / ${Math.ceil(phasesince + phaseuntil)}`]],
+    ['div', ['article', { 'data-tooltip': `${thisseason}` }, `${seasonemoji} ${Math.ceil(seasonsince)} / ${Math.ceil(seasonsince + seasonuntil)}`]],
+    ['div', ['article', { 'data-tooltip': `${thisphase}` }, `${phaseemoji} ${Math.ceil(phasesince)} / ${Math.ceil(phasesince + phaseuntil)}`]],
     ['div', ['article', { 'data-tooltip': `Next: ${nextmonth}` }, `${thismonth} ${Math.ceil(monthsince)} / ${Math.ceil(monthsince + monthuntil)}`]],
     ['div#grid-time', ['article', { 'data-tooltip': `${witchy.now.toLocaleTimeString()}` }, witchy.time.str]]
   ]
