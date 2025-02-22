@@ -4,7 +4,7 @@ import { timeinfo } from '../lib/times'
 import { alchemize, snag, listento } from 'html-alchemist'
 import { TITLE, HOW_IT_WORKS, REFLECTIONS, GEOLOCATION_ASK, CONCLUSION, SEASONS_WHAT, BUT_WHY, MONTHS_WHAT } from './text'
 import { explainHolidays, explainMonth, explainPhase, explainSeason, explainTime } from './explain'
-import { MONTHS, SEASONS } from '../lib/constants'
+import { MONTHS, SEASONS, SNOSAES } from '../lib/constants'
 import { comesafter } from '../lib/utils'
 
 // POTIONS
@@ -169,6 +169,29 @@ function generalError (error) {
 
 // DA GUTZ
 
+const explaingrid = (witchy, southern = false) => {
+  let thisseason = witchy.season.current[0]
+  if (southern) thisseason = SNOSAES[SEASONS.indexOf(thisseason)]
+  const seasonsince = witchy.season.current[2]
+  const seasonuntil = witchy.season.upcoming[2]
+  const thisphase = witchy.moon.current[0]
+  const phasesince = witchy.moon.current[2]
+  const phaseuntil = witchy.moon.upcoming[2]
+
+  const thismonth = witchy.month.current[0]
+  const monthsince = witchy.month.current[2]
+  const nextmonth = witchy.month.upcoming[0]
+  const monthuntil = witchy.month.upcoming[2]
+  return [
+    'div.grid',
+    { style: 'text-align: center;' },
+    ['div', ['article', `${thisseason} ${Math.ceil(seasonsince)} / ${Math.ceil(seasonsince + seasonuntil)}`]],
+    ['div', ['article', `${thisphase} ${Math.ceil(phasesince)} / ${Math.ceil(phasesince + phaseuntil)}`]],
+    ['div', ['article', { 'data-tooltip': `Next: ${nextmonth}` }, `${thismonth} ${Math.ceil(monthsince)} / ${Math.ceil(monthsince + monthuntil)}`]],
+    ['div#grid-time', ['article', { 'data-tooltip': `${witchy.now.toLocaleTimeString()}` }, witchy.time.str]]
+  ]
+}
+
 async function beginTicking ({ latitude, longitude, remembered }) {
   if (this.task) clearInterval(this.task)
   let date = new Date()
@@ -176,10 +199,13 @@ async function beginTicking ({ latitude, longitude, remembered }) {
   console.log(witchy) // i left this here for you freaky console fuckers
   let holidays = explainHolidays(witchy)
   let trying = false // CONCURRENCY
+  const southern = (latitude < 0)
   // initial state
   this.innerHTML = alchemize([
     ...title('A lunisolar calendar.'),
-    ['div#explainers', explanation(witchy, (latitude < 0))],
+    ['div#witch-grid', explaingrid(witchy, southern)],
+    ['p', 'That is...'],
+    ['div#explainers', explanation(witchy, southern)],
     ['div#holidays', todayholidays(holidays)],
     ['p', 'Reporting on position:'],
     ['ul',
@@ -195,13 +221,15 @@ async function beginTicking ({ latitude, longitude, remembered }) {
       trying = true
       witchy = await witchify(date, latitude, longitude)
       holidays = explainHolidays(witchy)
-      snag('explainers').innerHTML = alchemize(explanation(witchy))
+      snag('witch-grid').innerHTML = alchemize(explaingrid(witchy, southern))
+      snag('explainers').innerHTML = alchemize(explanation(witchy, southern))
       if (holidays) snag('holidays').innerHTML = alchemize(todayholidays(holidays))
       trying = false
     } else {
       witchy.time = timeinfo(date, witchy.day)
       witchy.now = date
       snag('current-time').innerHTML = alchemize(explainTime(witchy))
+      snag('grid-time').innerHTML = alchemize(['article', { 'data-tooltip': `${witchy.now.toLocaleTimeString()}` }, witchy.time.str])
     }
   }
   try {
