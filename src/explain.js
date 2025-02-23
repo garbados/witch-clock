@@ -10,7 +10,7 @@ export function explainSeason (witchy, southern = false) {
   if (southern) nextseason = SNOSAES[SEASONS.indexOf(nextseason)]
   const until = witchy.season.upcoming[2]
   parts.push(`It is day ${Math.ceil(since)} of ${thisseason};`)
-  const tilNextSeason = Math.ceil(since + until) - Math.ceil(since)
+  const tilNextSeason = Math.ceil(until)
   if (tilNextSeason === 1) {
     parts.push(`${nextseason} starts tomorrow.`)
   } else {
@@ -26,7 +26,7 @@ export function explainPhase (witchy) {
   const nextphase = witchy.moon.upcoming[0]
   const until = witchy.moon.upcoming[2]
   parts.push(`It is day ${Math.ceil(since)} of the ${thisphase} Moon;`)
-  const tilNextPhase = Math.ceil(since + until) - Math.ceil(since)
+  const tilNextPhase = Math.ceil(until)
   if (tilNextPhase === 1) {
     parts.push(`${nextphase} starts tomorrow.`)
   } else {
@@ -42,7 +42,7 @@ export function explainMonth (witchy) {
   const nextmonth = witchy.month.upcoming[0]
   const until = witchy.month.upcoming[2]
   parts.push(`It is day ${Math.ceil(since)} of the ${thismonth}'s Moon;`)
-  const tilNextMonth = Math.ceil(since + until) - Math.ceil(since)
+  const tilNextMonth = Math.ceil(until)
   if (tilNextMonth === 1) {
     parts.push(`the ${nextmonth}'s starts tomorrow.`)
   } else {

@@ -83,16 +83,16 @@ async function fetchCurrentPosition (remembered) {
 // VIEWS
 
 function loading () {
-  this.innerHTML = alchemize(title('... is loading!'))
+  this.replaceChildren(alchemize(title('... is loading!')))
 }
 
 function askForPermission () {
-  this.innerHTML = alchemize([
+  this.replaceChildren(alchemize([
     ...title('... needs your permission!'),
     GEOLOCATION_ASK.map(p),
     GEO_REMEMBER,
     ['input#geo-permission', { type: 'button', value: 'OK!' }]
-  ])
+  ]))
   enterCustomLatlong.call(this)
   listento('geo-permission', 'click', async () => {
     const remembered = snag('geo-remember').checked
@@ -108,16 +108,16 @@ function askForPermission () {
   })
 }
 
-function enterCustomLatlong (remembered) {
+function enterCustomLatlong () {
   const options = { type: 'text', inputmode: 'decimal', value: 0 }
-  this.innerHTML += alchemize([
+  this.appendChild(alchemize([
     ['p', 'Or, you can enter a custom latitude and longitude.'],
     ['input#geo-latitude', options],
     ['input#geo-longitude', options],
     GEO_REMEMBER,
     ['input#geo-custom', { type: 'button', value: 'OK!' }],
     ['input#where-am-i', { type: 'button', value: 'Reset location with GPS' }]
-  ])
+  ]))
   listento('geo-custom', 'click', async () => {
     try {
       const { value: latstr } = snag('geo-latitude')
@@ -151,19 +151,19 @@ function enterCustomLatlong (remembered) {
 }
 
 function userDeniedPermission (error) {
-  this.innerHTML = alchemize([
+  this.replaceChildren(alchemize([
     ...title('... could not obtain your permission!'),
     ['p', error.message]
-  ])
+  ]))
   enterCustomLatlong.call(this)
 }
 
 function generalError (error) {
   console.trace(error)
-  this.innerHTML = alchemize([
+  this.replaceChildren(alchemize([
     ...title('... encountered an unknown problem!'),
     ['p', error.message]
-  ])
+  ]))
   enterCustomLatlong.call(this)
 }
 
@@ -186,9 +186,9 @@ const explaingrid = (witchy, southern = false) => {
   return [
     'div.grid',
     { style: 'text-align: center;' },
-    ['div', ['article', { 'data-tooltip': `${thisseason}` }, `${seasonemoji} ${Math.ceil(seasonsince)} / ${Math.ceil(seasonsince + seasonuntil)}`]],
-    ['div', ['article', { 'data-tooltip': `${thisphase}` }, `${phaseemoji} ${Math.ceil(phasesince)} / ${Math.ceil(phasesince + phaseuntil)}`]],
-    ['div', ['article', { 'data-tooltip': `Next: ${nextmonth}` }, `${thismonth} ${Math.ceil(monthsince)} / ${Math.ceil(monthsince + monthuntil)}`]],
+    ['div', ['article', { 'data-tooltip': `${thisseason}` }, `${seasonemoji} ${Math.ceil(seasonsince)} / ${Math.ceil(seasonsince) + Math.ceil(seasonuntil)}`]],
+    ['div', ['article', { 'data-tooltip': `${thisphase}` }, `${phaseemoji} ${Math.ceil(phasesince)} / ${Math.ceil(phasesince) + Math.ceil(phaseuntil)}`]],
+    ['div', ['article', { 'data-tooltip': `Next: ${nextmonth}` }, `${thismonth} ${Math.ceil(monthsince)} / ${Math.ceil(monthsince) + Math.ceil(monthuntil)}`]],
     ['div#grid-time', ['article', { 'data-tooltip': `${witchy.now.toLocaleTimeString()}` }, witchy.time.str]]
   ]
 }
@@ -202,7 +202,7 @@ async function beginTicking ({ latitude, longitude, remembered }) {
   let trying = false // CONCURRENCY
   const southern = (latitude < 0)
   // initial state
-  this.innerHTML = alchemize([
+  this.replaceChildren(alchemize([
     ...title('A lunisolar calendar.'),
     ['div#witch-grid', explaingrid(witchy, southern)],
     ['p', 'That is...'],
@@ -213,7 +213,7 @@ async function beginTicking ({ latitude, longitude, remembered }) {
       ['li', `Latitude: ${latitude}`],
       ['li', `Longitude: ${longitude}`]
     ]
-  ])
+  ]))
   enterCustomLatlong.call(this, remembered)
   // refresh cycle
   const refresh = async () => {
@@ -222,15 +222,15 @@ async function beginTicking ({ latitude, longitude, remembered }) {
       trying = true
       witchy = await witchify(date, latitude, longitude)
       holidays = explainHolidays(witchy)
-      snag('witch-grid').innerHTML = alchemize(explaingrid(witchy, southern))
-      snag('explainers').innerHTML = alchemize(explanation(witchy, southern))
-      if (holidays) snag('holidays').innerHTML = alchemize(todayholidays(holidays))
+      snag('witch-grid').replaceChildren(alchemize(explaingrid(witchy, southern)))
+      snag('explainers').replaceChildren(alchemize(explanation(witchy, southern)))
+      if (holidays) snag('holidays').replaceChildren(alchemize(todayholidays(holidays)))
       trying = false
     } else {
       witchy.time = timeinfo(date, witchy.day)
       witchy.now = date
-      snag('current-time').innerHTML = alchemize(explainTime(witchy))
-      snag('grid-time').innerHTML = alchemize(['article', { 'data-tooltip': `${witchy.now.toLocaleTimeString()}` }, witchy.time.str])
+      snag('current-time').replaceChildren(alchemize(explainTime(witchy)))
+      snag('grid-time').replaceChildren(alchemize(['article', { 'data-tooltip': `${witchy.now.toLocaleTimeString()}` }, witchy.time.str]))
     }
   }
   try {
@@ -277,7 +277,7 @@ class WitchClock extends HTMLElement {
 
 class Docs extends HTMLElement {
   async connectedCallback () {
-    this.innerHTML = alchemize([
+    this.replaceChildren(alchemize([
       [
         heading('How it works'),
         ['ul', HOW_IT_WORKS.map(s => ['li', s])]
@@ -309,17 +309,17 @@ class Docs extends HTMLElement {
         ['h3', 'Where is the source?'],
         ['p', ['a', { href: 'https://github.com/garbados/witch-clock' }, 'GitHub.']]
       ]
-    ])
+    ]))
   }
 }
 
 class App extends HTMLElement {
   async connectedCallback () {
-    this.innerHTML = alchemize([
+    this.replaceChildren(alchemize([
       'main.container',
       ['section', ['witch-clock', '']],
       ['section', ['how-and-why', '']]
-    ])
+    ]))
   }
 }
 
