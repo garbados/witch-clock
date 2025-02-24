@@ -1,5 +1,5 @@
 import { REFLECTIONS } from './text'
-import { CONCLUSIONS, CORPSE, FULL, NOMAD, SEASONS, SNOSAES } from '../lib/constants'
+import { CONCLUSIONS, CORPSE, FULL, NOMAD, SEASONS, SNOSAES, SEASON_EMOJIS, PHASE_EMOJIS } from '../lib/constants'
 
 export function explainSeason (witchy, southern = false) {
   const parts = []
@@ -86,4 +86,28 @@ export function explainHolidays (witchy) {
     ]])
   }
   return holidays.length ? holidays : null
+}
+
+export function explainGrid (witchy, southern = false) {
+  let thisseason = witchy.season.current[0]
+  if (southern) thisseason = SNOSAES[SEASONS.indexOf(thisseason)]
+  const seasonsince = witchy.season.current[2]
+  const seasonuntil = witchy.season.upcoming[2]
+  const seasonemoji = SEASON_EMOJIS[thisseason]
+  const thisphase = witchy.moon.current[0]
+  const phasesince = witchy.moon.current[2]
+  const phaseuntil = witchy.moon.upcoming[2]
+  const phaseemoji = PHASE_EMOJIS[thisphase]
+  const thismonth = witchy.month.current[0]
+  const monthsince = witchy.month.current[2]
+  const nextmonth = witchy.month.upcoming[0]
+  const monthuntil = witchy.month.upcoming[2]
+  return [
+    'div.grid',
+    { style: 'text-align: center;' },
+    ['div', ['article', { 'data-tooltip': `${thisseason}` }, `${seasonemoji} ${Math.ceil(seasonsince)} / ${Math.ceil(seasonsince) + Math.ceil(seasonuntil)}`]],
+    ['div', ['article', { 'data-tooltip': `${thisphase}` }, `${phaseemoji} ${Math.ceil(phasesince)} / ${Math.ceil(phasesince) + Math.ceil(phaseuntil)}`]],
+    ['div', ['article', { 'data-tooltip': `Next: ${nextmonth}` }, `${thismonth} ${Math.ceil(monthsince)} / ${Math.ceil(monthsince) + Math.ceil(monthuntil)}`]],
+    ['div#grid-time', ['article', { 'data-tooltip': `${witchy.now.toLocaleTimeString()}` }, witchy.time.str]]
+  ]
 }
