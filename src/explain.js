@@ -105,9 +105,9 @@ export function explainGrid (witchy, southern = false) {
   return [
     'div.grid',
     { style: 'text-align: center;' },
-    ['div', ['article', { 'data-tooltip': `${thisseason}` }, `${seasonemoji} ${Math.ceil(seasonsince)} / ${Math.ceil(seasonsince) + Math.ceil(seasonuntil)}`]],
-    ['div', ['article', { 'data-tooltip': `${thisphase}` }, `${phaseemoji} ${Math.ceil(phasesince)} / ${Math.ceil(phasesince) + Math.ceil(phaseuntil)}`]],
-    ['div', ['article', { 'data-tooltip': `Next: ${nextmonth}` }, `${thismonth} ${Math.ceil(monthsince)} / ${Math.ceil(monthsince) + Math.ceil(monthuntil)}`]],
+    ['div', ['article', { 'data-tooltip': `${thisseason}` }, `${seasonemoji} ${Math.ceil(seasonsince)} / ${Math.ceil(seasonsince) + Math.floor(seasonuntil)}`]],
+    ['div', ['article', { 'data-tooltip': `${thisphase}` }, `${phaseemoji} ${Math.ceil(phasesince)} / ${Math.ceil(phasesince) + Math.floor(phaseuntil)}`]],
+    ['div', ['article', { 'data-tooltip': `Next: ${nextmonth}` }, `${thismonth} ${Math.ceil(monthsince)} / ${Math.ceil(monthsince) + Math.floor(monthuntil)}`]],
     ['div#grid-time', ['article', { 'data-tooltip': `${witchy.now.toLocaleTimeString()}` }, witchy.time.str]]
   ]
 }
