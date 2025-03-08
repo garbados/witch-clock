@@ -86,14 +86,14 @@ function loading () {
   this.replaceChildren(alchemize(title('... is loading!')))
 }
 
-function askForPermission () {
+async function askForPermission () {
   this.replaceChildren(alchemize([
     ...title('... needs your permission!'),
     GEOLOCATION_ASK.map(p),
     GEO_REMEMBER,
     ['input#geo-permission', { type: 'button', value: 'OK!' }]
   ]))
-  enterCustomLatlong.call(this)
+  await enterCustomLatlong.call(this)
   listento('geo-permission', 'click', async () => {
     const remembered = snag('geo-remember').checked
     loading.call(this)
@@ -102,18 +102,20 @@ function askForPermission () {
       const coords = await fetchCurrentPosition(remembered)
       beginTicking.call(this, coords)
     } catch (e) {
-      userDeniedPermission.call(this, e)
+      await userDeniedPermission.call(this, e)
     }
     clearTimeout(timeout)
   })
 }
 
-function enterCustomLatlong () {
-  const options = { type: 'text', inputmode: 'decimal', value: 0 }
+async function enterCustomLatlong (recalled) {
+  if (!recalled) recalled = await recallCurrentPosition()
+  const { latitude, longitude } = recalled
+  const options = { type: 'text', inputmode: 'decimal' }
   this.appendChild(alchemize([
     ['p', 'Or, you can enter a custom latitude and longitude.'],
-    ['input#geo-latitude', options],
-    ['input#geo-longitude', options],
+    ['input#geo-latitude', { ...options, value: latitude }],
+    ['input#geo-longitude', { ...options, value: longitude }],
     GEO_REMEMBER,
     ['input#geo-custom', { type: 'button', value: 'OK!' }],
     ['input#where-am-i', { type: 'button', value: 'Reset location with GPS' }]
@@ -150,21 +152,21 @@ function enterCustomLatlong () {
   })
 }
 
-function userDeniedPermission (error) {
+async function userDeniedPermission (error) {
   this.replaceChildren(alchemize([
     ...title('... could not obtain your permission!'),
     ['p', error.message]
   ]))
-  enterCustomLatlong.call(this)
+  await enterCustomLatlong.call(this)
 }
 
-function generalError (error) {
+async function generalError (error) {
   console.trace(error)
   this.replaceChildren(alchemize([
     ...title('... encountered an unknown problem!'),
     ['p', error.message]
   ]))
-  enterCustomLatlong.call(this)
+  await enterCustomLatlong.call(this)
 }
 
 // DA GUTZ
@@ -190,7 +192,7 @@ async function beginTicking ({ latitude, longitude, remembered }) {
       ['li', `Longitude: ${longitude}`]
     ]
   ]))
-  enterCustomLatlong.call(this, remembered)
+  await enterCustomLatlong.call(this, { latitude, longitude })
   // refresh cycle
   const refresh = async () => {
     date = new Date()
@@ -213,7 +215,7 @@ async function beginTicking ({ latitude, longitude, remembered }) {
     await refresh()
     this.task = setInterval(refresh, 1000)
   } catch (e) {
-    generalError.call(this, e)
+    await generalError.call(this, e)
   }
 }
 
@@ -235,10 +237,10 @@ class WitchClock extends HTMLElement {
             const coords = await fetchCurrentPosition()
             await beginTicking.call(this, coords)
           } catch (e) {
-            generalError.call(this, e)
+            await generalError.call(this, e)
           }
         } else {
-          askForPermission.call(this)
+          await askForPermission.call(this)
         }
       }
     } catch (e) {
