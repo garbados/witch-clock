@@ -110,7 +110,8 @@ async function askForPermission () {
 
 async function enterCustomLatlong (recalled) {
   if (!recalled) recalled = await recallCurrentPosition()
-  const { latitude, longitude } = recalled
+  const latitude = recalled?.latitude || 0
+  const longitude = recalled?.longitude || 0
   const options = { type: 'text', inputmode: 'decimal' }
   this.appendChild(alchemize([
     ['p', 'Or, you can enter a custom latitude and longitude.'],
