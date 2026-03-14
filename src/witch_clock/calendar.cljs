@@ -54,6 +54,7 @@
      :winter winter}))
 
 (defn- inc-date [dt] (new js/Date (inc (.getTime dt))))
+(defn- dec-by-a-day [dt] (new js/Date (- (.getTime dt) 86400000))) ; 1000 * 60 * 60 * 24
 (defn- to-date [astro-dt] (-> astro-dt .-time .-date))
 (defn- compare-dates [op dt1 dt2 & dts]
   (apply op (map #(.getTime %) (concat [dt1 dt2] dts))))
@@ -99,19 +100,19 @@
              (drop-while #(not= :moon/new (:phase %)))
              first
              :date)
-        the-conclusion
+        start-of-next-cycle
         (->> (get-moon-phases-since winter)
              (drop-while #(not= :moon/new (:phase %)))
              first
              :date)
         phases-in-cycle
         (take-while
-         #(is-before (:date %) the-conclusion)
+         #(is-before (:date %) start-of-next-cycle)
          (get-moon-phases-since start-of-cycle))
         days-in-cycle
         (when (and lat lon)
           (take-while
-           #(is-before (:dawn %) the-conclusion)
+           #(is-before (:dawn %) start-of-next-cycle)
            (get-dawn-dusk-since start-of-cycle lat lon height)))
         months
         (first
@@ -127,7 +128,7 @@
     (cond->
      {:months months
       :seasons seasons
-      :conclusion the-conclusion}
+      :conclusion (dec-by-a-day start-of-next-cycle)}
       days-in-cycle (assoc :days days-in-cycle))))
 
 (defn get-holidays [witch-year]
@@ -149,4 +150,7 @@
      []
      SEASONS)
     [["Beginning of Respite" (get-in witch-year [:seasons :winter])]
-     ["The Conclusion" (:conclusion witch-year)]])))
+     [(if (= 12 (count (:months witch-year)))
+        "The Return"
+        "The Demise")
+      (:conclusion witch-year)]])))

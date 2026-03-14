@@ -3,7 +3,6 @@
    [clojure.string :as string]
    [shadow.cljs.modern :refer [defclass]]
    [witch-clock.alchemy :refer [alchemize] :as alchemy]
-   [witch-clock.db :as db]
    [witch-clock.templates :as templates]))
 
 (def -locations (atom {}))
@@ -12,9 +11,7 @@
 
 (defn main-view [node]
   (.appendChild node (alchemize templates/container))
-  (.then (js/Promise.resolve (db/setup-db -locations))
-         #(do (add-watch -locations :refresh refresh)
-              (refresh))))
+  (add-watch -locations :refresh refresh))
 
 (defclass MainComponent
   (extends js/HTMLElement)
