@@ -1,17 +1,25 @@
-(ns witch-clock.web 
+(ns witch-clock.web
   (:require
    [clojure.string :as string]
    [shadow.cljs.modern :refer [defclass]]
+   [witch-clock.geo :as geo]
    [witch-clock.alchemy :refer [alchemize] :as alchemy]
    [witch-clock.templates :as templates]))
 
-(def -locations (atom {}))
 
 (defn refresh [] (println "TODO"))
+(def -locations (atom {}))
+(def -geo (atom nil))
 
 (defn main-view [node]
-  (.appendChild node (alchemize templates/container))
-  (add-watch -locations :refresh refresh))
+  (-> (geo/recall-current-position)
+      (.then
+       (fn [coords] (reset! -geo coords)))
+      (.finally
+       (fn []
+         (.appendChild node (alchemize (templates/container -geo)))
+         (add-watch -geo :watch-geo (fn [] (println @-geo)))
+         (add-watch -locations :refresh refresh)))))
 
 (defclass MainComponent
   (extends js/HTMLElement)

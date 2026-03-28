@@ -10,3 +10,6 @@
   "Clojure-friendly wrapper around Alchemist's alchemize function."
   [expr]
   (alchemy/alchemize (clj->js expr)))
+
+(defn listen-to [id event cb]
+  (alchemy/listento (str id) (str event) cb))
