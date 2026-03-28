@@ -8,18 +8,20 @@
 
 
 (defn refresh [] (println "TODO"))
-(def -locations (atom {}))
-(def -geo (atom nil))
+(def -geo (atom nil)) ; TODO handle many locations
+
+(defn setup-geo []
+  (-> (geo/recall-current-position)
+      (.then (fn [coords] (reset! -geo coords)))
+      (.catch #(js/console.log "No saved geo position."))))
 
 (defn main-view [node]
-  (-> (geo/recall-current-position)
-      (.then
-       (fn [coords] (reset! -geo coords)))
-      (.finally
-       (fn []
-         (.appendChild node (alchemize (templates/container -geo)))
-         (add-watch -geo :watch-geo (fn [] (println @-geo)))
-         (add-watch -locations :refresh refresh)))))
+  (.appendChild node (alchemize (templates/container)))
+  (.then
+   (setup-geo)
+   (fn []
+     (alchemy/refresh :geo (templates/ask-for-geo -geo))
+     (add-watch -geo :watch-geo (fn [] (alchemy/refresh :geo (templates/ask-for-geo -geo)))))))
 
 (defclass MainComponent
   (extends js/HTMLElement)

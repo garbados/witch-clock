@@ -2,9 +2,9 @@
   (:require
    ["html-alchemist" :as alchemy]))
 
-(def refresh alchemy/refresh)
-(def snag alchemy/snag)
-(def profane alchemy/profane)
+(defn refresh [id expr] (alchemy/refresh (name id) (clj->js expr)))
+(defn snag [id] (alchemy/snag (name id)))
+(defn profane [tag expr] (alchemy/profane (name tag) expr))
 
 (defn alchemize
   "Clojure-friendly wrapper around Alchemist's alchemize function."

@@ -6,9 +6,9 @@
 
 (defn title
   ([header]
-   [:hgroup.has-text-centered>h1.title#title header])
+   [:section>hgroup.has-text-centered>h1.title#title header])
   ([header subtitle]
-   [:hgroup.has-text-centered
+   [:section>hgroup.has-text-centered
     [:h1.title#title header]
     [:p.subtitle#subtitle subtitle]]))
 
@@ -27,15 +27,19 @@
    [:hr]])
 
 (defn ask-for-geo [-geo]
-  [:section.section>div.box#geo-forms
-   (geo/ask-for-geo-form -geo :remember-id geo/save-geo-id)
-   #_(geo/reset-geo-form geo/geo-reset-id -geo)
-   #_(geo/forget-geo-form geo/geo-forget-id -geo)
-   #_(geo/custom-geo-form 0 0 :remember-id geo/save-custom-geo-id -geo)])
+  [:section
+   (if (nil? @-geo)
+     (geo/ask-for-geo-form -geo :remember-id geo/save-geo-id)
+     [(geo/reset-geo-form geo/geo-reset-id -geo)
+      (geo/forget-geo-form geo/geo-forget-id -geo)])
+   (geo/custom-geo-form -geo :remember-id geo/save-custom-geo-id)])
 
-(defn container [-geo]
-  [:section.section>main.container
+(defn container []
+  [:main.container
    (title text/title
           text/subtitle)
    [:hr]
-   (ask-for-geo -geo)])
+   [:div#clock]
+   [:div#geo]
+   [:div#holidays]
+   [:div#about]])
