@@ -7,7 +7,6 @@
    [witch-clock.templates :as templates]))
 
 
-(defn refresh [] (println "TODO"))
 (def -geo (atom nil)) ; TODO handle many locations
 
 (defn setup-geo []
