@@ -72,26 +72,23 @@
    (let [{:keys [date] :as next} (get-next-moon-phase dt)]
      (lazy-seq (cons next (get-moon-phases-since (inc-date date)))))))
 
-(defn- get-next-dawn-dusk [dt lat lon height]
-  (let [body (clj->js
-              {:latitude lat
-               :longitude lon
-               :height height})]
+(defn- get-next-dawn-dusk [dt latitude longitude height]
+  (let [body (new astro/Observer latitude longitude height)]
     {:dawn
-     (to-date (astro/SearchRiseSet "Sun" body 1 dt 366))
+     (.-date (astro/SearchRiseSet "Sun" body 1 dt 366))
      :dusk
-     (to-date (astro/SearchRiseSet "Sun" body -1 dt 366))}))
+     (.-date (astro/SearchRiseSet "Sun" body -1 dt 366))}))
 
-(defn- get-dawn-dusk-since [dt lat lon height]
-  (let [dawn-dusk (get-next-dawn-dusk dt lat lon height)
-        next-dt (-> dawn-dusk :dusk to-date inc-date)]
+(defn- get-dawn-dusk-since [dt latitude longitude height]
+  (let [dawn-dusk (get-next-dawn-dusk dt latitude longitude height)
+        next-dt (-> dawn-dusk :dusk inc-date)]
     (lazy-seq
      (cons
-      (get-next-dawn-dusk dt lat lon height)
-      (get-dawn-dusk-since next-dt lat lon height)))))
+      (get-next-dawn-dusk dt latitude longitude height)
+      (get-dawn-dusk-since next-dt latitude longitude height)))))
 
 (defn from-gregorian-year
-  [year & {:keys [lat lon height]
+  [year & {:keys [latitude longitude height]
            :or {height 0}}]
   (let [{:keys [last-winter winter] :as seasons*} (get-seasons year)
         seasons (dissoc seasons* :last-winter)
@@ -110,10 +107,10 @@
          #(is-before (:date %) start-of-next-cycle)
          (get-moon-phases-since start-of-cycle))
         days-in-cycle
-        (when (and lat lon)
+        (when (and latitude longitude)
           (take-while
            #(is-before (:dawn %) start-of-next-cycle)
-           (get-dawn-dusk-since start-of-cycle lat lon height)))
+           (get-dawn-dusk-since start-of-cycle latitude longitude height)))
         months
         (first
          (reduce

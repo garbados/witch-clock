@@ -1,7 +1,7 @@
 (ns witch-clock.templates.geo
   (:require
    [witch-clock.alchemy :refer [snag profane]]
-   [witch-clock.geo :refer [get-current-position save-current-position forget-current-position]]
+   [witch-clock.geo :as geo]
    [witch-clock.text :as text :refer [sections]]))
 
 (def decimal-input-options {:type "text" :inputmode "decimal"})
@@ -31,18 +31,18 @@
    [(str "input#" geo-permission-id)
     {:type :button
      :onclick (fn []
-                (.then (get-current-position)
-                       (fn [coords]
-                         (when (and remember-id
-                                    (.-checked (snag (name remember-id))))
-                           (save-current-position coords))
-                         (reset! -geo coords))))
+                (let [remember? (and remember-id (.-checked (snag (name remember-id))))]
+                  (.then (geo/fetch-current-position remember?)
+                         (fn [coords] (reset! -geo coords)))))
      :value "OK!"}]])
 
 (defn reset-geo-form [id -geo]
   [(str "input.pico-background-orange-200#" id)
    {:type :button
-    :onclick (fn [] (.then (get-current-position) (fn [coords] (reset! -geo coords))))
+    :onclick (fn []
+               (when (js/confirm "Do you want to reset your location using GPS?")
+                 (.then (geo/get-current-position)
+                        (fn [coords] (reset! -geo coords)))))
     :value "Reset location with GPS"}])
 
 (defn forget-geo-form [id -geo]
@@ -50,7 +50,7 @@
    {:type :button
     :onclick (fn []
                (when (js/confirm "Do you want to forget your saved location?")
-                 (forget-current-position)
+                 (geo/forget-current-position)
                  (reset! -geo nil)))
     :value "Forget saved location"}])
 
