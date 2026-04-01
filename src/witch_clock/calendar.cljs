@@ -138,7 +138,7 @@
           [[] phases-in-cycle]
           MONTH-NAMES))
         [new-cycle-eve new-cycle-day] (take-last 2 days-in-cycle)]
-    {:cycle (- year FIRST-CYCLE-YEAR)
+    {:cycle (inc (- year FIRST-CYCLE-YEAR))
      :months months
      :seasons seasons
      :conclusion (:dawn new-cycle-eve)
@@ -170,60 +170,72 @@
       (:conclusion witch-year)]])))
 
 (defn get-now [{:keys [months seasons days cycle-end]} dt]
-  (let [dawns (map :dawn days)
-        dawn-to-dawn
-        (->> (conj (vec (rest dawns)) cycle-end)
-             (map vector dawns)
-             (map-indexed vector))
-        cycle-n (count days)
-        [cycle-i [dawn next-dawn]]
-        (->> dawn-to-dawn
-             (drop-while #(is-before (first (second %)) dt))
-             first)
-        dusk
-        (->> days
-             (filter
-              (fn [day] (= (:dawn day) dawn)))
-             first
-             :dusk)
-        [season season-dt]
-        (->> (sort-by second is-after seasons)
-             (filter
-              (fn [[_season season-dt]]
-                (is-before season-dt dawn)))
-             first)
-        next-season (get NEXT-SEASON season)
-        next-season-dt (get seasons next-season)
-        season-i (days-between dawns season-dt dawn)
-        season-n (days-between dawns season-dt next-season-dt)
-        moon-phase-dt
-        (->> months
-             (reduce
-              (fn [acc [month phases]]
-                (reduce
-                 (fn [acc {:keys [phase date]}]
-                   (conj acc [month phase date]))
-                 acc
-                 phases))
-              []))
-        sorted-moon-phase-dt (sort-by #(nth % 2) is-before moon-phase-dt)
-        [month phase phase-dt]
-        (->> sorted-moon-phase-dt
-             (filter
-              (fn [[_month _phase phase-dt]]
-                (is-before phase-dt dawn)))
-             last)
-        [next-month next-phase next-phase-dt]
-        (->> sorted-moon-phase-dt
-             (filter
-              (fn [[_month _phase other-phase-dt]]
-                (is-after other-phase-dt phase-dt)))
-             first)
-        phase-i (days-between dawns phase-dt dawn)
-        phase-n (days-between dawns phase-dt next-phase-dt)]
-    {:cycle [(inc cycle-i) cycle-n]
-     :season [season season-dt (inc season-i) season-n]
-     :next-season [next-season next-season-dt]
-     :month [month phase phase-dt (inc phase-i) phase-n]
-     :next-month [next-month next-phase next-phase-dt]
-     :day [dawn dusk next-dawn]}))
+  (cond
+    (is-before dt (:dawn (first days)))
+    (str "Date is before first dawn: "
+         (.toLocaleString dt)
+         " < "
+         (.toLocaleString (:dawn (first days))))
+    (is-after dt cycle-end)
+    (str "Date is after cycle end: "
+         (.toLocaleString cycle-end)
+         " < "
+         (.toLocaleString dt))
+    :else
+    (let [dawns (map :dawn days)
+          dawn-to-dawn
+          (->> (conj (vec (rest dawns)) cycle-end)
+               (map vector dawns)
+               (map-indexed vector))
+          cycle-n (count days)
+          [cycle-i [dawn next-dawn]]
+          (->> dawn-to-dawn
+               (drop-while #(is-before (first (second %)) dt))
+               first)
+          dusk
+          (->> days
+               (filter
+                (fn [day] (= (:dawn day) dawn)))
+               first
+               :dusk)
+          [season season-dt]
+          (->> (sort-by second is-after seasons)
+               (filter
+                (fn [[_season season-dt]]
+                  (is-before season-dt dawn)))
+               first)
+          next-season (get NEXT-SEASON season)
+          next-season-dt (get seasons next-season)
+          season-i (days-between dawns season-dt dawn)
+          season-n (days-between dawns season-dt next-season-dt)
+          moon-phase-dt
+          (->> months
+               (reduce
+                (fn [acc [month phases]]
+                  (reduce
+                   (fn [acc {:keys [phase date]}]
+                     (conj acc [month phase date]))
+                   acc
+                   phases))
+                []))
+          sorted-moon-phase-dt (sort-by #(nth % 2) is-before moon-phase-dt)
+          [month phase phase-dt]
+          (->> sorted-moon-phase-dt
+               (filter
+                (fn [[_month _phase phase-dt]]
+                  (is-before phase-dt dawn)))
+               last)
+          [next-month next-phase next-phase-dt]
+          (->> sorted-moon-phase-dt
+               (filter
+                (fn [[_month _phase other-phase-dt]]
+                  (is-after other-phase-dt phase-dt)))
+               first)
+          phase-i (days-between dawns phase-dt dawn)
+          phase-n (days-between dawns phase-dt next-phase-dt)]
+      {:cycle [(inc cycle-i) cycle-n]
+       :season [season season-dt (inc season-i) season-n]
+       :next-season [next-season next-season-dt]
+       :month [month phase phase-dt (inc phase-i) phase-n]
+       :next-month [next-month next-phase next-phase-dt]
+       :day [dawn dusk next-dawn]})))
