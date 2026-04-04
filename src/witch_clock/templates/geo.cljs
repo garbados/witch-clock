@@ -66,5 +66,5 @@
      (when remember-id (remember-geo-check remember-id))
      [(str "input#" custom-geo-id)
       {:type :button
-       :onclick (fn [] (js/console.log "clicked!"))
+       :onclick (fn [] (js/alert "TODO"))
        :value "OK!"}]]))
