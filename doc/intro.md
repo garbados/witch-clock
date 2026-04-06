@@ -1,4 +1,5 @@
-# 🍄🧙‍♀️ Calendar of the Witchmothers 🔮✨
+# 🍄🧙‍♀️ Witch Clock 🔮✨
+
 ## 🌞 A lunisolar calendar 🌙
 
 ### Geolocation
@@ -20,7 +21,7 @@ Feasts are celebrated on the first day of the full moon of each month.
 Conclusions are celebrated on the last day of each cycle, either the Return or the Demise.
 Days span from sunrise to sunrise. This means that, at some extreme latitudes, witchy days are much longer than 24-hour days.
 There are 20 hours in a day: 10 of sunlight, 10 of nighttime. This means hours are elastic to the time of year.
-0:00:00 is sunrise. 5:00:00 is noon. 10:00:00 is sunset. 15:00:00 is midnight.
+0:00:00 is sunrise. 5:00:00 is noon. 10:00:00 is dusk. 15:00:00 is midnight.
 In an hour, there are 100 minutes, and 100 seconds.
 
 ### But Why?

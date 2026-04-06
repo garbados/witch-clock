@@ -2,8 +2,9 @@
   (:require
    ["html-alchemist" :as alchemy]))
 
-(defn refresh [id expr] (alchemy/refresh (name id) (clj->js expr)))
-(defn snag [id] (alchemy/snag (name id)))
+(defn idify [id] (if (keyword? id) (name id) id))
+(defn refresh [id expr] (alchemy/refresh (idify id) (clj->js expr)))
+(defn snag [id] (alchemy/snag (idify id)))
 (defn profane [tag expr] (alchemy/profane (name tag) expr))
 
 (defn alchemize

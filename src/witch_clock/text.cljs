@@ -7,7 +7,8 @@
   {:intro (inline-slurp "doc/intro.md")
    :months (inline-slurp "doc/months.md")
    :seasons (inline-slurp "doc/seasons.md")
-   :cycle (inline-slurp "doc/cycle.md")})
+   :cycle (inline-slurp "doc/cycle.md")
+   :holidays (inline-slurp "doc/holidays.md")})
 
 (def title (second (re-find #"\# (.+?)\n" (:intro raw-text))))
 (def subtitle (second (re-find #"\#\# (.+?)\n" (:intro raw-text))))
@@ -29,6 +30,13 @@
         [#"\*" "em"]])
       (string/replace $ #"\[(.+?)\]\((.+?)\)" "<a href=\"$2\">$1</a>"))))
 
+(defn ->kw [s]
+  (-> s
+      string/trim
+      string/lower-case
+      (string/replace #"\s+" "-")
+      keyword))
+
 (defn- gather-sections
   ([s] (gather-sections s #"(\n+)?\#+ "))
   ([s prefix]
@@ -41,11 +49,7 @@
       (let [[raw-title body] (string/split (string/trim raw-section) #"\n\n" 2)
             html (md-ish body)]
         (cond->
-         {:kw (-> raw-title
-                   string/trim
-                   string/lower-case
-                   (string/replace #"\s+" "-")
-                   keyword)
+         {:kw (->kw raw-title)
           :title (string/trim raw-title)}
           html (assoc :html html)))))))
 

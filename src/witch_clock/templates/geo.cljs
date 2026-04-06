@@ -28,7 +28,7 @@
     [:h2 "Hold on! Time is relative to space, so I need to know where you are."]
     (profane :div (get-in sections [:intro :geolocation :html]))]
    (when remember-id (remember-geo-check remember-id))
-   [(str "input#" geo-permission-id)
+   [(str "input#" (name geo-permission-id))
     {:type :button
      :onclick (fn []
                 (let [remember? (and remember-id (.-checked (snag (name remember-id))))]
@@ -37,7 +37,7 @@
      :value "OK!"}]])
 
 (defn reset-geo-form [id -geo]
-  [(str "input.pico-background-orange-200#" id)
+  [(str "input.pico-background-orange-200#" (name id))
    {:type :button
     :onclick (fn []
                (when (js/confirm "Do you want to reset your location using GPS?")
@@ -46,7 +46,7 @@
     :value "Reset location with GPS"}])
 
 (defn forget-geo-form [id -geo]
-  [(str "input.pico-background-cyan-100#" id)
+  [(str "input.pico-background-cyan-100#" (name id))
    {:type :button
     :onclick (fn []
                (when (js/confirm "Do you want to forget your saved location?")
@@ -60,11 +60,25 @@
                 geo-lon-id geo-lon-id}}]
   (let [{:keys [latitude longitude]
          :or {latitude 0 longitude 0}} @-geo]
-    [[:p, "Or, you can enter a custom latitude and longitude."],
-     [(str "input#" geo-lat-id) (assoc decimal-input-options :value latitude)]
-     [(str "input#" geo-lon-id) (assoc decimal-input-options :value longitude)]
+    [[:p, "Or, you can enter a custom latitude and longitude."]
+     [(str "input#" (name geo-lat-id)) (assoc decimal-input-options :value latitude)]
+     [(str "input#" (name geo-lon-id)) (assoc decimal-input-options :value longitude)]
      (when remember-id (remember-geo-check remember-id))
-     [(str "input#" custom-geo-id)
+     [(str "input#" (name custom-geo-id))
       {:type :button
-       :onclick (fn [] (js/alert "TODO"))
+       :onclick (fn []
+                  (let [latitude (.-value (snag geo-lat-id))
+                        longitude (-> geo-lon-id snag .-value)
+                        coords {:latitude latitude :longitude longitude}]
+                    (reset! -geo coords)))
        :value "OK!"}]]))
+
+(defn ask-for-geo [-geo]
+  [:section
+   (if (nil? @-geo)
+     (ask-for-geo-form -geo :remember-id save-geo-id)
+     [[:h2 "Geolocation"]
+      [:hr]
+      (reset-geo-form geo-reset-id -geo)
+      (forget-geo-form geo-forget-id -geo)])
+   (custom-geo-form -geo :remember-id save-custom-geo-id)])

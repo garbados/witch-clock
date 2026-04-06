@@ -5,7 +5,7 @@
 
 ;; TODO: specs for testing
 
-(def MONTH-NAMES
+(def MONTHS
   [:month/jester
    :month/wizard
    :month/diviner
@@ -20,17 +20,56 @@
    :month/nomad
    :month/corpse])
 
-(def MONTH-PHASES
+(def MONTH-NAMES
+  {:month/jester "Jester"
+   :month/wizard "Wizard"
+   :month/diviner "Diviner"
+   :month/monarch "Monarch"
+   :month/steward "Steward"
+   :month/hierophant "Hierophant"
+   :month/lover "Lover"
+   :month/courier "Courier"
+   :month/warrior "Warrior"
+   :month/hermit "Hermit"
+   :month/trader "Trader"
+   :month/nomad "Nomad"
+   :month/corpse "Corpse"})
+
+(def MOON-PHASES
   [:moon/new
    :moon/waxing
    :moon/full
    :moon/waning])
+
+(def PHASE-NAMES
+  {:moon/new    "New"
+   :moon/waxing "Waxing"
+   :moon/full   "Full"
+   :moon/waning "Waning"})
+
+(def PHASE-EMOJIS
+  {:moon/new    "🌑"
+   :moon/waxing "🌓"
+   :moon/full   "🌕"
+   :moon/waning "🌗"})
 
 (def SEASONS
   [:season/spring
    :season/summer
    :season/fall
    :season/winter])
+
+(def SEASON-NAMES
+  {:season/spring "Spring"
+   :season/summer "Summer"
+   :season/fall   "Fall"
+   :season/winter "Winter"})
+
+(def SEASON-EMOJIS
+  {:season/spring "🌷"
+   :season/summer "☀️"
+   :season/fall   "🍂"
+   :season/winter "❄️"})
 
 (def NEXT-SEASON
   (zipmap (concat [:last-winter] SEASONS)
@@ -69,8 +108,8 @@
 (defn- to-date [astro-dt] (-> astro-dt .-time .-date))
 (defn- compare-dates [op dt1 dt2 & dts]
   (apply op (map #(.getTime %) (concat [dt1 dt2] dts))))
-(def ^:private is-before (partial compare-dates <))
-(def ^:private is-after (partial compare-dates >))
+(def is-before (partial compare-dates <))
+(def is-after (partial compare-dates >))
 (defn days-between [days dt1 dt2]
   (count
    (filter
@@ -79,7 +118,7 @@
 
 (defn- get-next-moon-phase [dt]
   (let [mq (astro/SearchMoonQuarter dt)
-        phase (nth MONTH-PHASES (.-quarter mq))]
+        phase (nth MOON-PHASES (.-quarter mq))]
     {:phase phase
      :date (to-date mq)}))
 
@@ -136,9 +175,9 @@
                  (drop 4 remaining-phases)]
                 [acc remaining-phases])))
           [[] phases-in-cycle]
-          MONTH-NAMES))
+          MONTHS))
         [new-cycle-eve new-cycle-day] (take-last 2 days-in-cycle)]
-    {:cycle (inc (- year FIRST-CYCLE-YEAR))
+    {:nth-cycle (inc (- year FIRST-CYCLE-YEAR))
      :months months
      :seasons seasons
      :conclusion (:dawn new-cycle-eve)
@@ -169,10 +208,10 @@
         "The Demise")
       (:conclusion witch-year)]])))
 
-(defn get-now
+(defn get-day
   ([witchy-year]
-   (get-now witchy-year (new js/Date)))
-  ([{:keys [months seasons days cycle-end]} dt]
+   (get-day witchy-year (new js/Date)))
+  ([{:keys [months seasons days cycle-end nth-cycle]} dt]
    (cond
      (is-before dt (:dawn (first days)))
      (str "Date is before first dawn: "
@@ -248,12 +287,14 @@
              [next-month* nil next-phase-dt]
              (->> next-moon-phases
                   (filter
-                   (fn [[next-month _phase _dt]]
-                     (not= month next-month)))
+                   (fn [[next-month _phase next-month-dt]]
+                     (and
+                      (is-before month-dt next-month-dt)
+                      (not= month next-month))))
                   last))
            month-i (days-between dawns month-dt dawn)
            month-n (days-between dawns month-dt next-month-dt)]
-       {:cycle [(inc cycle-i) cycle-n]
+       {:cycle [nth-cycle (inc cycle-i) cycle-n]
         :season [season season-dt (inc season-i) season-n]
         :next-season [next-season next-season-dt]
         :month [month month-dt (inc month-i) month-n]
@@ -267,17 +308,15 @@
    (fn [{:keys [day] :as _witchy-now}]
      (let [[dawn dusk next-dawn] day
            daylight-ms (- (.getTime dusk) (.getTime dawn))
-           day-hour-ms (/ daylight-ms 10)
-           nighttime-ms (- (.getTime next-dawn) (.getTime dusk))
-           night-hour-ms (/ nighttime-ms 10)]
-       {:day-hour day-hour-ms
-        :night-hour night-hour-ms}))))
+           nighttime-ms (- (.getTime next-dawn) (.getTime dusk))]
+       {:day-hour-ms (/ daylight-ms 10)
+        :night-hour-ms (/ nighttime-ms 10)}))))
 
 (defn get-current-time
   ([witchy-now]
    (get-current-time witchy-now (new js/Date)))
   ([{:keys [day] :as witchy-now} dt]
-   (let [{:keys [day-hour night-hour]} (get-hour-lengths witchy-now)
+   (let [{:keys [day-hour-ms night-hour-ms] :as time-meta} (get-hour-lengths witchy-now)
          [dawn-ms dusk-ms next-dawn-ms] (map #(.getTime %) day)
          now-ms (.getTime dt)
          day? (< now-ms dusk-ms)
@@ -290,7 +329,7 @@
         (.toLocaleString dt))
        (let [witchy-hour
              (if day?
-               (/ (- now-ms dawn-ms) day-hour)
-               (+ 10 (/ (- now-ms dusk-ms) night-hour)))
+               (/ (- now-ms dawn-ms) day-hour-ms)
+               (+ 10 (/ (- now-ms dusk-ms) night-hour-ms)))
              [_ hour minute second] (re-matches #"(\d{1,2})\.(\d{2})(\d{2})\d+" (str witchy-hour))]
-         [hour minute second])))))
+         (assoc time-meta :time [hour minute second]))))))
