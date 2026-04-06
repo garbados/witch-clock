@@ -44,7 +44,9 @@
 (defn current-holidays [{:keys [nth-cycle] :as witchy-year}]
   (let [holidays (calendar/get-holidays witchy-year)]
     [:section
-     [:h1.title (str "Holidays for Cycle " nth-cycle)]
+     [:hgroup.has-text-centered
+      [:h2 "Holidays"]
+      [:p (str "In Cycle " nth-cycle)]]
      (for [[holiday dt] holidays
            :let [kw (text/->kw holiday)]]
        [:article>details

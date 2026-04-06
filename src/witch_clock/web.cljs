@@ -11,6 +11,7 @@
 
 
 (def -geo (atom nil)) ; TODO handle many locations
+(def -greg-year (atom nil))
 (def -year (atom nil))
 (def -date (atom nil))
 (def -time (atom nil))
@@ -23,21 +24,30 @@
 
 (defn refresh-geo []
   (alchemy/refresh :geo (geo-templates/ask-for-geo -geo))
-  (let [year (.getFullYear (new js/Date))
-        {:keys [latitude longitude]} @-geo
-        witchy-year (calendar/from-gregorian-year year latitude longitude)]
-    (reset! -year witchy-year)))
+  (if-let [{:keys [latitude longitude]} @-geo]
+    (if (nil? @-greg-year)
+      (reset! -greg-year (.getFullYear (new js/Date)))
+      (reset! -year (calendar/from-gregorian-year @-greg-year latitude longitude)))
+    (do
+      (when (some? @-time-timer)
+        (swap! -time-timer #(js/clearInterval %)))
+      (alchemy/refresh :clock [:div])
+      (alchemy/refresh :holidays [:div]))))
+
+(defn reset-greg-year []
+  (when-let [{:keys [latitude longitude]} @-geo]
+    (reset! -year (calendar/from-gregorian-year @-greg-year latitude longitude))))
 
 (defn refresh-year []
-  (reset! -date (calendar/get-day @-year))
-  (alchemy/refresh :holidays (calendar-templates/current-holidays @-year)))
+  (alchemy/refresh :holidays (calendar-templates/current-holidays @-year))
+  (reset! -date (calendar/get-day @-year)))
 
 (defn refresh-date []
   (let [time (calendar/get-current-time @-date)]
     (alchemy/refresh :clock (calendar-templates/calendar-grid @-date time))
     (reset! -time time)
     (when @-time-timer
-      (swap! @-time-timer #(js/clearInterval %)))
+      (swap! -time-timer #(js/clearInterval %)))
     (reset! -time-timer
             (js/setInterval
              (fn []
@@ -59,6 +69,7 @@
 
 (defn main-view [node]
   (add-watch -geo :watch-geo refresh-geo)
+  (add-watch -greg-year :watch-greg reset-greg-year)
   (add-watch -year :watch-year refresh-year)
   (add-watch -date :watch-date refresh-date)
   (add-watch -time :watch-time refresh-time)

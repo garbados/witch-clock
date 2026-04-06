@@ -24,9 +24,7 @@
 (defn ask-for-geo-form [-geo
                         & {:keys [remember-id geo-permission-id]
                            :or {geo-permission-id geo-permission-id}}]
-  [[:section.content
-    [:h2 "Hold on! Time is relative to space, so I need to know where you are."]
-    (profane :div (get-in sections [:intro :geolocation :html]))]
+  [(profane :div (get-in sections [:intro :geolocation :html]))
    (when remember-id (remember-geo-check remember-id))
    [(str "input#" (name geo-permission-id))
     {:type :button
@@ -76,9 +74,11 @@
 (defn ask-for-geo [-geo]
   [:section
    (if (nil? @-geo)
-     (ask-for-geo-form -geo :remember-id save-geo-id)
+     [[:hgroup
+       [:h2 "Hold on!"]
+       [:p "Time is relative to space, so I need to know where you are."]]
+      (ask-for-geo-form -geo :remember-id save-geo-id)]
      [[:h2 "Geolocation"]
-      [:hr]
       (reset-geo-form geo-reset-id -geo)
       (forget-geo-form geo-forget-id -geo)])
    (custom-geo-form -geo :remember-id save-custom-geo-id)])

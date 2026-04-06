@@ -8,7 +8,8 @@
    :months (inline-slurp "doc/months.md")
    :seasons (inline-slurp "doc/seasons.md")
    :cycle (inline-slurp "doc/cycle.md")
-   :holidays (inline-slurp "doc/holidays.md")})
+   :holidays (inline-slurp "doc/holidays.md")
+   :changelog (inline-slurp "doc/changelog.md")})
 
 (def title (second (re-find #"\# (.+?)\n" (:intro raw-text))))
 (def subtitle (second (re-find #"\#\# (.+?)\n" (:intro raw-text))))

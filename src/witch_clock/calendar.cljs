@@ -184,7 +184,7 @@
      :cycle-end (:dawn new-cycle-day)
      :days (drop-last days-in-cycle)}))
 
-(defn get-holidays [{:keys [months seasons] :as witch-year}]
+(defn get-holidays [{:keys [months seasons days] :as witch-year}]
   (sort-by
    second
    (concat
@@ -202,8 +202,16 @@
          (conj acc [holiday-name holiday-date])))
      []
      SEASONS)
-    [["Beginning of Respite" (get seasons :season/winter)]
-     [(if (= 12 (count (:months witch-year)))
+    [(let [winter-dt (get seasons :season/winter)
+           respite-dt (->> days
+                           (filter
+                            (fn [{:keys [dawn]}]
+                              (is-after dawn winter-dt)))
+                           (drop 2)
+                           first
+                           :dawn)]
+       ["Beginning of Respite" respite-dt])
+     [(if (= 12 (count months))
         "The Return"
         "The Demise")
       (:conclusion witch-year)]])))
