@@ -44,7 +44,7 @@
 
 (defn refresh-date []
   (let [time (calendar/get-current-time @-date)]
-    (alchemy/refresh :clock (calendar-templates/calendar-grid @-date time))
+    (alchemy/refresh :clock (calendar-templates/current-calendar @-year @-date time))
     (reset! -time time)
     (when @-time-timer
       (swap! -time-timer #(js/clearInterval %)))
@@ -62,7 +62,7 @@
                    (reset! -date (calendar/get-day @-year now))
                    :else
                    (reset! -time (calendar/get-current-time @-date)))))
-             (* 5 1000)))))
+             (* 3 1000)))))
 
 (defn refresh-time []
   (alchemy/refresh :current-time (string/join ":" (:time @-time))))

@@ -74,11 +74,13 @@
 (defn ask-for-geo [-geo]
   [:section
    (if (nil? @-geo)
-     [[:hgroup
+     [[:hgroup.has-text-centered
        [:h2 "Hold on!"]
        [:p "Time is relative to space, so I need to know where you are."]]
-      (ask-for-geo-form -geo :remember-id save-geo-id)]
-     [[:h2 "Geolocation"]
-      (reset-geo-form geo-reset-id -geo)
-      (forget-geo-form geo-forget-id -geo)])
-   (custom-geo-form -geo :remember-id save-custom-geo-id)])
+      [(ask-for-geo-form -geo :remember-id save-geo-id)
+       (custom-geo-form -geo :remember-id save-custom-geo-id)]]
+     [[:article>details
+       [:summary>hgroup>h2.has-text-centered "Geolocation"]
+       [(reset-geo-form geo-reset-id -geo)
+        (forget-geo-form geo-forget-id -geo)
+        (custom-geo-form -geo :remember-id save-custom-geo-id)]]])])

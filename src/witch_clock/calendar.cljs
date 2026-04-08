@@ -41,6 +41,10 @@
    :moon/full
    :moon/waning])
 
+(def NEXT-PHASE
+  (zipmap MOON-PHASES
+          (drop 1 (cycle MOON-PHASES))))
+
 (def PHASE-NAMES
   {:moon/new    "New"
    :moon/waxing "Waxing"
@@ -60,10 +64,12 @@
    :season/winter])
 
 (def SEASON-NAMES
-  {:season/spring "Spring"
+  {:last-winter "Winter"
+   :season/spring "Spring"
    :season/summer "Summer"
    :season/fall   "Fall"
-   :season/winter "Winter"})
+   :season/winter "Winter"
+   :next-spring "Spring"})
 
 (def SEASON-EMOJIS
   {:season/spring "🌷"
@@ -184,22 +190,42 @@
      :cycle-end (:dawn new-cycle-day)
      :days (drop-last days-in-cycle)}))
 
-(defn get-holidays [{:keys [months seasons days] :as witch-year}]
+(defn get-holidays [{:keys [months seasons days conclusion]}]
   (sort-by
    second
    (concat
     (reduce
      (fn [acc [month phases]]
        (let [holiday-name (str "Feast of the " (string/capitalize (name month)))
-             holiday-date (:date (first (filter #(= :moon/full (:phase %)) phases)))]
-         (conj acc [holiday-name holiday-date])))
+             occurs-at-dt (:date (first (filter #(= :moon/full (:phase %)) phases)))
+             holiday-dt (->> days
+                             (filter
+                              (fn [{:keys [dawn]}]
+                                (is-before dawn occurs-at-dt)))
+                             last
+                             :dawn)]
+         (conj acc [holiday-name holiday-dt occurs-at-dt])))
      []
      months)
     (reduce
      (fn [acc season]
        (let [holiday-name (str "Festival of " (string/capitalize (name season)))
-             holiday-date (get seasons season)]
-         (conj acc [holiday-name holiday-date])))
+             occurs-at-dt (get seasons season)
+             holiday-dt (->> days
+                             (filter
+                              (fn [{:keys [dawn]}]
+                                (is-before dawn occurs-at-dt)))
+                             last
+                             :dawn)
+             festival-ends-dt
+             (->> days
+                  (filter
+                   (fn [{:keys [dawn]}]
+                     (is-after dawn holiday-dt)))
+                  (drop 1)
+                  first
+                  :dawn)]
+         (conj acc [holiday-name holiday-dt occurs-at-dt festival-ends-dt])))
      []
      SEASONS)
     [(let [winter-dt (get seasons :season/winter)
@@ -207,14 +233,14 @@
                            (filter
                             (fn [{:keys [dawn]}]
                               (is-after dawn winter-dt)))
-                           (drop 2)
+                           rest
                            first
                            :dawn)]
-       ["Beginning of Respite" respite-dt])
+       ["Respite" respite-dt nil conclusion])
      [(if (= 12 (count months))
-        "The Return"
-        "The Demise")
-      (:conclusion witch-year)]])))
+        "Return"
+        "Demise")
+      conclusion]])))
 
 (defn get-day
   ([witchy-year]
@@ -339,5 +365,13 @@
              (if day?
                (/ (- now-ms dawn-ms) day-hour-ms)
                (+ 10 (/ (- now-ms dusk-ms) night-hour-ms)))
-             [_ hour minute second] (re-matches #"(\d{1,2})\.(\d{2})(\d{2})\d+" (str witchy-hour))]
+             [_ hour minute second] (re-matches #"(\d{1,2})\.(\d{2})(\d{2})\d+" (str witchy-hour))
+             minute (js/Math.floor (* (js/parseInt minute 10) 0.6))
+             minute (if (= 1 (count (str minute)))
+                      (str "0" minute)
+                      (str minute))
+             second (js/Math.floor (* (js/parseInt second 10) 0.6))
+             second (if (= 1 (count (str second)))
+                      (str "0" second)
+                      (str second))]
          (assoc time-meta :time [hour minute second]))))))
