@@ -29,7 +29,7 @@
       (string/replace $ #"- (.+)\n?" "<li>$1</li>")
       (string/replace $ #"<li>(.+)</li>" "<ul><li>$1</li></ul>")
       (string/replace $ #"(.+?)  \n" "$1<br>")
-      (string/replace $ #"\n?(.+?)\n" "<p>$1</p>")
+      (string/replace $ #"(.+?)\n{2}" "<p>$1</p>")
       (string/replace $ #"\[(.+?)\]\((.+?)\)" "<a href=\"$2\">$1</a>"))))
 
 re-find

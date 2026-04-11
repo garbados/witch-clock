@@ -1,6 +1,6 @@
 # Months
 
-There are twelve or thirteen lunar months in a witch cycle, varying to account for the distinct natures of solar and lunar cycles, beginning with the Jester's Moon. In cycles with twelve months, they are called Nomad Years; in thirteen, Corpse Years. Each lunar month has four weeks, one for each phase: new, waxing, full, waning. The factual length of weeks and months depends on the actual movement of the heavens, but can be closely modeled with astrophysics.
+There are twelve or thirteen lunar months in a witch cycle, beginning with the Jester's Moon. In cycles with twelve months, they are called Nomad Years; in thirteen, Corpse Years.
 
 ## Jester
 

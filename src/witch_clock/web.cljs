@@ -23,10 +23,16 @@
       (.catch #(js/console.log %))))
 
 (defn refresh-clock! [year date time]
-  (alchemy/refresh :clock (calendar-templates/current-calendar year date time)))
+  (alchemy/refresh :clock
+                   (if year
+                     (calendar-templates/current-calendar year date time)
+                     [:div])))
 
 (defn refresh-holidays! [year]
-  (alchemy/refresh :holidays (calendar-templates/current-holidays year)))
+  (alchemy/refresh :holidays
+                   (if year
+                     (calendar-templates/current-holidays year)
+                     [:div])))
 
 (defn refresh-geo! [-geo]
   (alchemy/refresh :geo (geo-templates/ask-for-geo -geo)))
@@ -53,7 +59,7 @@
                  (reset! -time (calendar/get-current-time @-date)))))
            (* 3 1000))))
 
-(defn update-geo! [-geo -greg-year -year -date -time]
+(defn update-geo! [-geo -greg-year -year]
   (refresh-geo! -geo)
   (if-let [{:keys [latitude longitude]} @-geo]
     (if (nil? @-greg-year)
@@ -62,8 +68,8 @@
     (do
       (when (some? @-time-timer)
         (swap! -time-timer #(js/clearInterval %)))
-      (refresh-clock! @-year @-date @-time)
-      (refresh-holidays! @-year))))
+      (refresh-clock! nil nil nil)
+      (refresh-holidays! nil))))
 
 (defn update-year! [-geo -greg-year]
   (when-let [{:keys [latitude longitude]} @-geo]
@@ -79,7 +85,7 @@
     (track-time! -geo -year -date -time -time-timer)))
 
 (defn main-view [node]
-  (add-watch -geo :watch-geo #(update-geo! -geo -greg-year -year -date -time))
+  (add-watch -geo :watch-geo #(update-geo! -geo -greg-year -year))
   (add-watch -greg-year :watch-greg #(update-year! -geo -greg-year))
   (add-watch -year :watch-year #(refresh-year -year))
   (add-watch -date :watch-date #(refresh-date -geo -year -date -time -time-timer))

@@ -6,7 +6,7 @@
 
 The annual cycle begins on the first new moon after the winter solstice (summer solstice, in the southern hemisphere), beginning with the Jester's Moon. The first cycle began on December 30, 2024, relative to longitude 45.5152 and latitude -122.6784.
 
-A month is a lunar month, so there are either 12 or 13 months in a year. Each month contains four weeks, for the four phases of the moon: New, Waxing, Full, Waning. Feasts are celebrated on the first day of the full moon of each month.
+A month is a lunar month, so there are either 12 or 13 months in a year, to align the differences between solar and lunar cycles. Each month contains four weeks, for the four phases of the moon: New, Waxing, Full, Waning. Feasts are celebrated on the first day of the full moon of each month.
 
 A season spans the time between the nearest solstice and equinox. There are four seasons: Winter, Spring, Summer, and Autumn. Festivals are celebrated on the first day of each season, lasting for two days.
 
