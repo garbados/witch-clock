@@ -24,7 +24,7 @@
 (defn ask-for-geo-form [-geo
                         & {:keys [remember-id geo-permission-id]
                            :or {geo-permission-id geo-permission-id}}]
-  [(profane :div (get-in sections [:intro :geolocation :html]))
+  [(profane :div (get-in sections [:geo :geolocation :html]))
    (when remember-id (remember-geo-check remember-id))
    [(str "input#" (name geo-permission-id))
     {:type :button

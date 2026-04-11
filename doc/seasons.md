@@ -1,5 +1,8 @@
 # Seasons
 
+Every solstice and equinox is a celestial holiday, marking four seasons.
+
+
 ## Spring
 
 Sunlight has returned and the world blossoms.

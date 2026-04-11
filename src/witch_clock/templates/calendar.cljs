@@ -86,7 +86,8 @@
            (and
             (not= holiday "Respite") ; Respite has special handling
             (or (= (.getTime dawn) (.getTime holiday-dt))
-                (calendar/is-before dawn occurs-at-dt next-dawn)
+                (when occurs-at-dt
+                  (calendar/is-before dawn occurs-at-dt next-dawn))
                 (when holiday-ends-dt
                   (calendar/is-before holiday-dt dawn holiday-ends-dt)))))
          holidays)

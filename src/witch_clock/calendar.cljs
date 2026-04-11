@@ -82,6 +82,9 @@
           (concat SEASONS [:next-spring])))
 
 (def FIRST-CYCLE-YEAR 2025)
+(def HOURS-IN-HALF-DAY 12)
+(def MINUTES-IN-HOUR 60)
+(def SECONDS-IN-MINUTE 60)
 
 (defn- get-seasons [year]
   (let [js-seasons (astro/Seasons year)
@@ -343,8 +346,8 @@
      (let [[dawn dusk next-dawn] day
            daylight-ms (- (.getTime dusk) (.getTime dawn))
            nighttime-ms (- (.getTime next-dawn) (.getTime dusk))]
-       {:day-hour-ms (/ daylight-ms 10)
-        :night-hour-ms (/ nighttime-ms 10)}))))
+       {:day-hour-ms (/ daylight-ms HOURS-IN-HALF-DAY)
+        :night-hour-ms (/ nighttime-ms HOURS-IN-HALF-DAY)}))))
 
 (defn get-current-time
   ([witchy-now]
@@ -364,13 +367,13 @@
        (let [witchy-hour
              (if day?
                (/ (- now-ms dawn-ms) day-hour-ms)
-               (+ 10 (/ (- now-ms dusk-ms) night-hour-ms)))
+               (+ HOURS-IN-HALF-DAY (/ (- now-ms dusk-ms) night-hour-ms)))
              [_ hour minute second] (re-matches #"(\d{1,2})\.(\d{2})(\d{2})\d+" (str witchy-hour))
-             minute (js/Math.floor (* (js/parseInt minute 10) 0.6))
+             minute (js/Math.floor (* (js/parseInt minute 10) 0.01 MINUTES-IN-HOUR))
              minute (if (= 1 (count (str minute)))
                       (str "0" minute)
                       (str minute))
-             second (js/Math.floor (* (js/parseInt second 10) 0.6))
+             second (js/Math.floor (* (js/parseInt second 10) 0.01 SECONDS-IN-MINUTE))
              second (if (= 1 (count (str second)))
                       (str "0" second)
                       (str second))]

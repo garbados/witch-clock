@@ -1,5 +1,7 @@
 (ns witch-clock.templates.layout
-  (:require [witch-clock.text :as text]))
+  (:require
+   [witch-clock.templates.about :as about]
+   [witch-clock.text :as text]))
 
 (defn container []
   [:main.container
@@ -10,4 +12,5 @@
    [:div#clock]
    [:div#holidays]
    [:div#geo]
-   [:div#about]])
+   [:div#about
+    (about/explain-months)]])
