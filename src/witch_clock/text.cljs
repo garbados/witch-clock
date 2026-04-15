@@ -32,8 +32,6 @@
       (string/replace $ #"(.+?)\n{2}" "<p>$1</p>")
       (string/replace $ #"\[(.+?)\]\((.+?)\)" "<a href=\"$2\">$1</a>"))))
 
-re-find
-
 (defn ->kw [s]
   (-> s
       string/trim
