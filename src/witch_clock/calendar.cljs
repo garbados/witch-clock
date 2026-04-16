@@ -302,8 +302,8 @@
            (->> sorted-moon-phase-dt
                 (filter
                  (fn [[_month _phase phase-dt]]
-                   (is-before phase-dt (inc-date dawn))))
-                first)
+                   (is-before dawn phase-dt)))
+                last)
            [_month _phase month-dt]
            (->> sorted-moon-phase-dt
                 (filter
