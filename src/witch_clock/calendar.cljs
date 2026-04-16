@@ -267,11 +267,15 @@
                 (map vector dawns)
                 (map-indexed vector))
            cycle-n (count days)
-           [cycle-i* [dawn next-dawn]]
+           [cycle-i [dawn next-dawn]]
            (->> dawn-to-dawn
-                (filter #(is-before (first (second %)) dt))
-                last)
-           cycle-i (inc cycle-i*)
+                (filter
+                 (fn [[_cycle-i [dawn _next-dawn]]]
+                   (is-after dawn dt)))
+                (map
+                 (fn [[cycle-i [_dawn _next-dawn]]]
+                   [(inc cycle-i) [_dawn _next-dawn]]))
+                first)
            dusk
            (->> days
                 (filter
@@ -286,7 +290,7 @@
                 first)
            next-season (get NEXT-SEASON season)
            next-season-dt (get seasons next-season)
-           season-i (inc (days-between dawns season-dt dawn))
+           season-i (days-between dawns season-dt dawn)
            season-n (days-between dawns season-dt next-season-dt)
            moon-phase-dt
            (->> months
@@ -318,7 +322,7 @@
                  (fn [[_month _phase other-phase-dt]]
                    (is-before phase-dt other-phase-dt)))
                 last)
-           phase-i (inc (days-between dawns phase-dt dawn))
+           phase-i (days-between dawns phase-dt dawn)
            phase-n (days-between dawns phase-dt next-phase-dt)
            [next-month _next-phase next-month-dt]
            (if (not= month next-month*)
@@ -330,7 +334,7 @@
                       (is-before month-dt next-month-dt)
                       (not= month next-month))))
                   last))
-           month-i (inc (days-between dawns month-dt dawn))
+           month-i (days-between dawns month-dt dawn)
            month-n (days-between dawns month-dt next-month-dt)]
        {:cycle [nth-cycle (inc cycle-i) cycle-n]
         :season [season season-dt (inc season-i) season-n]
