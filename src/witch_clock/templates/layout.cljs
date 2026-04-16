@@ -13,8 +13,8 @@
    [:div#geo]
    [:div#intro
     (about/calendar-intro)]
-   [:div#seasons]
-   [:div#months]
    [:div#holidays]
+   [:div#months]
+   [:div#seasons]
    [:div#outro
     (about/calendar-outro)]])

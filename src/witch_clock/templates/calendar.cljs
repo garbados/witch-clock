@@ -139,9 +139,8 @@
     (alchemy/profane :p (get-in text/sections [:holidays :header :html]))]
    (for [[holiday dt occurs-at-dt ends-dt] (calendar/get-holidays witchy-year)
          :let [kw (text/->kw holiday)]]
-     [:article>details
-      {:name "holidays"}
-      [:summary>hgroup
+     [:article
+      [:hgroup
        [:h3 (str holiday)]
        [:p
         [:span (.toLocaleString dt)]
@@ -167,8 +166,8 @@
                      (fn [{:keys [dawn]}]
                        (calendar/is-before dawn season-start)))
                     last)]]
-     [:section>article>details
-      [:summary>hgroup
+     [:section>article
+      [:hgroup
        [:h3 title]
        [:p
         [:p
@@ -195,8 +194,8 @@
                          (calendar/is-before dawn month-start)))
                       last
                       :dawn))]]
-     [:section>article>details
-      [:summary>hgroup
+     [:section>article
+      [:hgroup
        [:h3 (str title "'s Moon")]
        (if month-start
          [:p
