@@ -285,7 +285,7 @@
                 first)
            next-season (get NEXT-SEASON season)
            next-season-dt (get seasons next-season)
-           season-i (days-between dawns season-dt dawn)
+           season-i (inc (days-between dawns season-dt dawn))
            season-n (days-between dawns season-dt next-season-dt)
            moon-phase-dt
            (->> months
@@ -302,8 +302,8 @@
            (->> sorted-moon-phase-dt
                 (filter
                  (fn [[_month _phase phase-dt]]
-                   (is-before dawn phase-dt)))
-                last)
+                   (is-before phase-dt dawn)))
+                first)
            [_month _phase month-dt]
            (->> sorted-moon-phase-dt
                 (filter
@@ -317,7 +317,7 @@
                  (fn [[_month _phase other-phase-dt]]
                    (is-before phase-dt other-phase-dt)))
                 last)
-           phase-i (days-between dawns phase-dt dawn)
+           phase-i (inc (days-between dawns phase-dt dawn))
            phase-n (days-between dawns phase-dt next-phase-dt)
            [next-month _next-phase next-month-dt]
            (if (not= month next-month*)
@@ -329,7 +329,7 @@
                       (is-before month-dt next-month-dt)
                       (not= month next-month))))
                   last))
-           month-i (days-between dawns month-dt dawn)
+           month-i (inc (days-between dawns month-dt dawn))
            month-n (days-between dawns month-dt next-month-dt)]
        {:cycle [nth-cycle (inc cycle-i) cycle-n]
         :season [season season-dt (inc season-i) season-n]

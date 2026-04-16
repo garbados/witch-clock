@@ -194,24 +194,15 @@
                        (fn [{:keys [dawn]}]
                          (calendar/is-before dawn month-start)))
                       last
-                      :dawn))
-               month-end (-> months lunar-month last :date)
-               month-end-day
-               (when month-end
-                 (->> days
-                      (filter
-                       (fn [{:keys [dawn]}]
-                         (calendar/is-after dawn month-end)))
-                      first
                       :dawn))]]
      [:section>article>details
       [:summary>hgroup
        [:h3 (str title "'s Moon")]
-       (if (and month-start month-end)
+       (if month-start
          [:p
           [:p
            [:span (.toLocaleString month-start-day)]
-           [:span (str " ; ends at " (.toLocaleString month-end-day))]]]
+           [:span (str " ; New Moon occurs at " (.toLocaleString month-start))]]]
          [:p "Does not occur this year."])]
       (when html
         (alchemy/profane :p html))])])
