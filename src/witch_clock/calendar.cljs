@@ -271,11 +271,11 @@
            (->> dawn-to-dawn
                 (filter
                  (fn [[_cycle-i [dawn _next-dawn]]]
-                   (is-after dawn dt)))
+                   (is-before dawn dt)))
                 (map
                  (fn [[cycle-i [_dawn _next-dawn]]]
                    [(inc cycle-i) [_dawn _next-dawn]]))
-                first)
+                last)
            dusk
            (->> days
                 (filter
@@ -307,8 +307,8 @@
            (->> sorted-moon-phase-dt
                 (filter
                  (fn [[_month _phase phase-dt]]
-                   (is-before phase-dt dawn)))
-                first)
+                   (is-before dawn phase-dt)))
+                last)
            [_month _phase month-dt]
            (->> sorted-moon-phase-dt
                 (filter
