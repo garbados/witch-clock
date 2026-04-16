@@ -6,6 +6,7 @@
 
 (def decimal-input-options {:type "text" :inputmode "decimal"})
 (def save-geo-id :remember-requested-geo)
+(def save-reset-geo-id :remember-reset-geo)
 (def save-custom-geo-id :remember-custom-geo)
 (def geo-reset-id :geo-reset)
 (def geo-forget-id :geo-forget)
@@ -34,14 +35,19 @@
                          (fn [coords] (reset! -geo coords)))))
      :value "OK!"}]])
 
-(defn reset-geo-form [id -geo]
-  [(str "input.pico-background-orange-200#" (name id))
-   {:type :button
-    :onclick (fn []
-               (when (js/confirm "Do you want to reset your location using GPS?")
-                 (.then (geo/get-current-position)
-                        (fn [coords] (reset! -geo coords)))))
-    :value "Reset location with GPS"}])
+(defn reset-geo-form [id -geo & {:keys [remember-id]}]
+  [(when remember-id (remember-geo-check remember-id))
+   [(str "input.pico-background-orange-200#" (name id))
+    {:type :button
+     :onclick (fn []
+                (when (js/confirm "Do you want to reset your location using GPS?")
+                  (.then (geo/get-current-position)
+                         (fn [coords]
+                           (let [remember? (and remember-id (.-checked (snag (name remember-id))))]
+                             (when remember?
+                               (geo/save-current-position coords))
+                             (reset! -geo coords))))))
+     :value "Reset location with GPS"}]])
 
 (defn forget-geo-form [id -geo]
   [(str "input.pico-background-cyan-100#" (name id))
@@ -65,9 +71,12 @@
      [(str "input#" (name custom-geo-id))
       {:type :button
        :onclick (fn []
-                  (let [latitude (.-value (snag geo-lat-id))
-                        longitude (-> geo-lon-id snag .-value)
+                  (let [remember? (and remember-id (.-checked (snag (name remember-id))))
+                        latitude (-> geo-lat-id snag .-value js/parseFloat)
+                        longitude (-> geo-lon-id snag .-value js/parseFloat)
                         coords {:latitude latitude :longitude longitude}]
+                    (when remember?
+                      (geo/save-current-position coords))
                     (reset! -geo coords)))
        :value "OK!"}]]))
 
@@ -81,6 +90,6 @@
        (custom-geo-form -geo :remember-id save-custom-geo-id)]]
      [:details
       [:summary>hgroup>h2 "Geolocation Settings"]
-      [(reset-geo-form geo-reset-id -geo)
+      [(reset-geo-form geo-reset-id -geo :remember-id save-reset-geo-id)
        (forget-geo-form geo-forget-id -geo)
        (custom-geo-form -geo :remember-id save-custom-geo-id)]])])

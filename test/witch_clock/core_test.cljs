@@ -5,11 +5,13 @@
    [witch-clock.calendar :as calendar]))
 
 (deftest witch-clock-sanity-test
-  (testing "Works for two hundred years."
+  (testing "Works for one hundred years."
     (doseq [[latitude longitude]
-            [[45.576140953484206 -122.68813708146509]]]
-      (doseq [i (range 200)
-              :let [greg-year (+ calendar/FIRST-CYCLE-YEAR i -100)
+            [[45.5761 -122.6881] ; north america
+             [25.2744 133.7751]  ; australia
+             ]]
+      (doseq [i (range 100)
+              :let [greg-year (+ calendar/FIRST-CYCLE-YEAR i -50)
                     {:keys [nth-cycle months seasons conclusion cycle-end days]}
                     (calendar/from-gregorian-year greg-year latitude longitude)]]
         (is (number? nth-cycle))

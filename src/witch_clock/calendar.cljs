@@ -86,7 +86,7 @@
 (def MINUTES-IN-HOUR 60)
 (def SECONDS-IN-MINUTE 60)
 
-(defn- get-seasons [year]
+(defn- get-seasons [year & {:keys [southern?]}]
   (let [js-seasons (astro/Seasons year)
         js-last-seasons (astro/Seasons (dec year))
         js-next-seasons (astro/Seasons (inc year))
@@ -98,12 +98,19 @@
          next-spring]
         (map
          #(-> % .-date)
-         [(.-dec_solstice js-last-seasons)
-          (.-mar_equinox js-seasons)
-          (.-jun_solstice js-seasons)
-          (.-sep_equinox js-seasons)
-          (.-dec_solstice js-seasons)
-          (.-mar_equinox js-next-seasons)])]
+         (if southern?
+           [(.-jun_solstice js-last-seasons)
+            (.-sep_equinox js-last-seasons)
+            (.-dec_solstice js-last-seasons)
+            (.-mar_equinox js-seasons)
+            (.-jun_solstice js-seasons)
+            (.-sep_equinox js-seasons)]
+           [(.-dec_solstice js-last-seasons)
+            (.-mar_equinox js-seasons)
+            (.-jun_solstice js-seasons)
+            (.-sep_equinox js-seasons)
+            (.-dec_solstice js-seasons)
+            (.-mar_equinox js-next-seasons)]))]
     {:last-winter last-winter
      :season/spring spring
      :season/summer summer
@@ -152,9 +159,10 @@
 
 (defn from-gregorian-year
   [year latitude longitude & {:keys [height] :or {height 0}}]
-  (let [{winter :season/winter
+  (let [southern? (< latitude 0)
+        {winter :season/winter
          :keys [last-winter]
-         :as seasons} (get-seasons year)
+         :as seasons} (get-seasons year :southern? southern?)
         start-of-cycle
         (->> (get-moon-phases-since last-winter)
              (drop-while #(not= :moon/new (:phase %)))
