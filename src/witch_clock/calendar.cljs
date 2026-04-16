@@ -267,10 +267,11 @@
                 (map vector dawns)
                 (map-indexed vector))
            cycle-n (count days)
-           [cycle-i [dawn next-dawn]]
+           [cycle-i* [dawn next-dawn]]
            (->> dawn-to-dawn
                 (filter #(is-before (first (second %)) dt))
                 last)
+           cycle-i (inc cycle-i*)
            dusk
            (->> days
                 (filter
