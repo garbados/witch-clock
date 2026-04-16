@@ -4,15 +4,18 @@
         "start": "shadow-cljs compile web",
         "dev": "shadow-cljs watch web",
         "release": "shadow-cljs release web",
-        "test": "lein test",
-        "cov": "lein cloverage"
+        "test": "shadow-cljs compile test && karma start --single-run"
     },
     "devDependencies": {
         "astronomy-engine": "^2.1.19",
         "html-alchemist": "^3.2.2",
-        "shadow-cljs": "^3.3.6"
+        "karma": "^6.4.4",
+        "karma-chrome-launcher": "^3.2.0",
+        "karma-cljs-test": "^0.1.0",
+        "shadow-cljs": "^3.4.4"
     },
     "dependencies": {
-        "@js-joda/core": "3.2.0"
+        "@js-joda/core": "3.2.0",
+        "puppeteer": "^24.41.0"
     }
 }
