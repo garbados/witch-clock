@@ -7,7 +7,6 @@
   {:intro     (inline-slurp "doc/intro.md")
    :months    (inline-slurp "doc/months.md")
    :seasons   (inline-slurp "doc/seasons.md")
-   :cycle     (inline-slurp "doc/cycle.md")
    :holidays  (inline-slurp "doc/holidays.md")
    :changelog (inline-slurp "doc/changelog.md")
    :qa        (inline-slurp "doc/qa.md")

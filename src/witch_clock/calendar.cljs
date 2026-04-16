@@ -112,8 +112,8 @@
      :next-spring next-spring}))
 
 (def day-in-ms 86400000) ; 1000 * 60 * 60 * 24
-(defn- dec-by-a-day [dt] (new js/Date (- (.getTime dt) day-in-ms)))
-(defn- inc-by-a-day [dt] (new js/Date (+ (.getTime dt) day-in-ms)))
+(defn- dec-date [dt & [offset]] (new js/Date (- (.getTime dt) (or offset day-in-ms))))
+(defn- inc-date [dt & [offset]] (new js/Date (+ (.getTime dt) (or offset day-in-ms))))
 (defn- to-date [astro-dt] (-> astro-dt .-time .-date))
 (defn- compare-dates [op dt1 dt2 & dts]
   (apply op (map #(.getTime %) (concat [dt1 dt2] dts))))
@@ -135,20 +135,20 @@
   ([] (get-moon-phases-since (new js/Date)))
   ([dt]
    (let [{:keys [date] :as next} (get-next-moon-phase dt)]
-     (lazy-seq (cons next (get-moon-phases-since (inc-by-a-day date)))))))
+     (lazy-seq (cons next (get-moon-phases-since (inc-date date)))))))
 
 (defn- get-next-dawn-dusk [dt latitude longitude height]
-  (let [body (new astro/Observer latitude longitude height)]
-    {:dawn
-     (.-date (astro/SearchRiseSet "Sun" body 1 dt 366))
-     :dusk
-     (.-date (astro/SearchRiseSet "Sun" body -1 (inc-by-a-day dt) 366))}))
+  (let [body (new astro/Observer latitude longitude height)
+        dawn (.-date (astro/SearchRiseSet "Sun" body 1 dt 366))
+        dusk (.-date (astro/SearchRiseSet "Sun" body -1 dawn 366))]
+    {:dawn dawn :dusk dusk}))
 
 (defn- get-dawn-dusk-since [dt latitude longitude height]
-  (lazy-seq
-   (cons
-    (get-next-dawn-dusk dt latitude longitude height)
-    (get-dawn-dusk-since (inc-by-a-day dt) latitude longitude height))))
+  (let [{:keys [dusk] :as dawn-dusk} (get-next-dawn-dusk dt latitude longitude height)]
+    (lazy-seq
+     (cons
+      dawn-dusk
+      (get-dawn-dusk-since dusk latitude longitude height)))))
 
 (defn from-gregorian-year
   [year latitude longitude & {:keys [height] :or {height 0}}]
@@ -160,7 +160,7 @@
              (drop-while #(not= :moon/new (:phase %)))
              first
              :date
-             dec-by-a-day)
+             dec-date)
         start-of-next-cycle
         (->> (get-moon-phases-since winter)
              (drop-while #(not= :moon/new (:phase %)))
@@ -180,10 +180,10 @@
           (fn [[acc remaining-phases] month]
             (let [weeks (take 4 remaining-phases)]
               (if (seq weeks)
-                [(conj acc [month (take 4 remaining-phases)])
+                [(assoc acc month (take 4 remaining-phases))
                  (drop 4 remaining-phases)]
                 [acc remaining-phases])))
-          [[] phases-in-cycle]
+          [{} phases-in-cycle]
           MONTHS))
         [new-cycle-eve new-cycle-day] (take-last 2 days-in-cycle)]
     {:nth-cycle (inc (- year FIRST-CYCLE-YEAR))
@@ -241,8 +241,8 @@
                            :dawn)]
        ["Respite" respite-dt nil conclusion])
      [(if (= 12 (count months))
-        "Return"
-        "Demise")
+        "The Return"
+        "The Demise")
       conclusion]])))
 
 (defn get-day
@@ -302,7 +302,7 @@
            (->> sorted-moon-phase-dt
                 (filter
                  (fn [[_month _phase phase-dt]]
-                   (is-before phase-dt (inc-by-a-day dawn))))
+                   (is-before phase-dt (inc-date dawn))))
                 first)
            [_month _phase month-dt]
            (->> sorted-moon-phase-dt

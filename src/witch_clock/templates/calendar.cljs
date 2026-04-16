@@ -41,27 +41,6 @@
       (str (get calendar/PHASE-EMOJIS phase) " " phase-i " / " phase-n)]
      [:div#time (calendar-time time)]]))
 
-(defn current-holidays [{:keys [nth-cycle] :as witchy-year}]
-  [:section
-   [:article>details
-    [:summary
-     [:hgroup.has-text-centered
-      [:h2 "Holidays"]
-      [:p (str "In Cycle " nth-cycle)]]]
-    (for [[holiday dt occurs-at-dt ends-dt] (calendar/get-holidays witchy-year)
-          :let [kw (text/->kw holiday)]]
-      [:article>details
-       {:name "holidays"}
-       [:summary>hgroup
-        [:h3 (str holiday)]
-        [:p
-         [:span (.toLocaleString dt)]
-         (when occurs-at-dt
-           [:span (str " ; occurs at " (.toLocaleString occurs-at-dt))])
-         (when ends-dt
-           [:span (str " ; ends at " (.toLocaleString ends-dt))])]]
-       (alchemy/profane :span (get-in text/sections [:holidays kw :html] ""))])]])
-
 (defn explain-date [witchy-year date time]
   (let [{[nth-cycle cycle-i cycle-n] :cycle
          [season _season-dt season-i season-n] :season
@@ -101,13 +80,27 @@
      [:header>hgroup
       [:h3 "About today"]]
      [:ul
-      [:li (str "It is day " cycle-i " of Cycle " nth-cycle "'s " cycle-n " days. " (- cycle-n cycle-i) " days until Cycle " (inc nth-cycle) ".")]
+      [:li (str "It is day " cycle-i " of Cycle " nth-cycle "'s " cycle-n " days. "
+                (let [til-cycle (inc (- cycle-n cycle-i))
+                      next-cycle (inc nth-cycle)]
+                  (if (= 1 til-cycle)
+                    (str "Cycle " next-cycle " starts tomorrow.")
+                    (str til-cycle " days until Cycle " next-cycle "."))))]
       [:li (str "It is day " season-i " of " season-name "'s " season-n " days. "
-                (inc (- season-n season-i)) " days until " next-season-name ".")]
+                (let [til-season (inc (- season-n season-i))]
+                  (if (= 1 til-season)
+                    (str next-season-name " starts tomorrow.")
+                    (str til-season " days until " next-season-name "."))))]
       [:li (str "It is day " month-i " of the " month-n " days in the " month-name "'s Moon. "
-                (inc (- month-n month-i)) " days until the " next-month-name "'s Moon.")]
+                (let [til-month (inc (- month-n month-i))]
+                  (if (= 1 til-month)
+                    (str "The " next-month-name "'s Moon starts tomorrow.")
+                    (str til-month " days until the " next-month-name "'s Moon."))))]
       [:li (str "It is day " phase-i " of the " phase-name " Moon's " phase-n " days. "
-                (inc (- phase-n phase-i)) " days until the " next-phase-name " Moon.")]
+                (let [til-phase (inc (- phase-n phase-i))]
+                  (if (= 1 til-phase)
+                    (str "The " next-phase-name " Moon starts tomorrow.")
+                    (str til-phase " days until the " next-phase-name " Moon."))))]
       [:li (str "Today began at " (.toLocaleString dawn) ". Daylight hours are " (subs (str (/ day-hour-ms GREG-HOUR-MS)) 0 4) " Gregorian hours long.")]
       [:li
        (str
@@ -138,3 +131,87 @@
   [:section
    (calendar-grid date time)
    (explain-date witchy-year date time)])
+
+(defn current-holidays [witchy-year]
+  [:section
+   [:hgroup
+    [:h3 (get-in text/sections [:holidays :header :title])]
+    (alchemy/profane :p (get-in text/sections [:holidays :header :html]))]
+   (for [[holiday dt occurs-at-dt ends-dt] (calendar/get-holidays witchy-year)
+         :let [kw (text/->kw holiday)]]
+     [:article>details
+      {:name "holidays"}
+      [:summary>hgroup
+       [:h3 (str holiday)]
+       [:p
+        [:span (.toLocaleString dt)]
+        (when occurs-at-dt
+          [:span (str " ; occurs at " (.toLocaleString occurs-at-dt))])
+        (when ends-dt
+          [:span (str " ; ends at " (.toLocaleString ends-dt))])]]
+      (alchemy/profane :span (get-in text/sections [:holidays kw :html] ""))])])
+
+(defn explain-seasons [{:keys [seasons days] :as _witchy-year}]
+  [:section
+   [:hgroup
+    [:h2 (get-in text/sections [:seasons :header :title])]
+    (when-let [html (get-in text/sections [:seasons :header :html])]
+      (alchemy/profane :p html))]
+   (for [season calendar/SEASONS
+         :let [season-name (get calendar/SEASON-NAMES season)
+               {:keys [title html]} (get-in text/sections [:seasons (text/->kw season-name)])
+               season-start (get seasons season)
+               season-start-day
+               (->> days
+                    (filter
+                     (fn [{:keys [dawn]}]
+                       (calendar/is-before dawn season-start)))
+                    last)]]
+     [:section>article>details
+      [:summary>hgroup
+       [:h3 title]
+       [:p
+        [:p
+         [:span (.toLocaleString (:dawn season-start-day))]
+         [:span (str " ; occurs at " (.toLocaleString season-start))]]]]
+      (when html
+        (alchemy/profane :p html))])])
+
+(defn explain-months [{:keys [months days] :as _witchy-year}]
+  [:section
+   [:hgroup
+    [:h2 (get-in text/sections [:months :header :title])]
+    (when-let [html (get-in text/sections [:months :header :html])]
+      (alchemy/profane :p html))]
+   (for [lunar-month calendar/MONTHS
+         :let [month-name (get calendar/MONTH-NAMES lunar-month)
+               {:keys [title html]} (get-in text/sections [:months (text/->kw month-name)])
+               month-start (-> months lunar-month first :date)
+               month-start-day
+               (when month-start
+                 (->> days
+                      (filter
+                       (fn [{:keys [dawn]}]
+                         (calendar/is-before dawn month-start)))
+                      last
+                      :dawn))
+               month-end (-> months lunar-month last :date)
+               month-end-day
+               (when month-end
+                 (->> days
+                      (filter
+                       (fn [{:keys [dawn]}]
+                         (calendar/is-after dawn month-end)))
+                      first
+                      :dawn))]]
+     [:section>article>details
+      [:summary>hgroup
+       [:h3 (str title "'s Moon")]
+       (if (and month-start month-end)
+         [:p
+          [:p
+           [:span (.toLocaleString month-start-day)]
+           [:span (str " ; ends at " (.toLocaleString month-end-day))]]]
+         [:p "Does not occur this year."])]
+      (when html
+        (alchemy/profane :p html))])])

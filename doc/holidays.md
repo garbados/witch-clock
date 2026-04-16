@@ -11,20 +11,20 @@ honor them with festivities.
 
 ## Feast of the Jester
 
-The fool sees things differently.  
-The wilder brings the wild;  
-The wanderer enters it.  
-Reflect on the unexpected;  
-Surprise someone,  
-Especially yourself.
+The fool sees things differently.
+The wilder brings the wild;
+the wanderer enters it.
+Reflect on the unexpected;
+surprise someone,
+especially yourself.
 
 ## Feast of the Wizard
 
-Great feats underpin your firmament.  
-A vast history produces you.  
-Every tool is art;  
-Every cleverness takes creativity.  
-Rid yourself of something advanced  
+Great feats underpin your firmament.
+A vast history produces you.
+Every tool is art;
+Every cleverness takes creativity.
+Rid yourself of something advanced
 To appreciate its absence.
 
 ## Feast of the Diviner
@@ -140,22 +140,94 @@ and accept the strangeness you find.
 ## Feast of the Corpse
 
 Do the dead sleep peacefully?
-Gaia and the Creator separate as they rot,
-however much rot becomes life.
+Gaia and the Creator separate when we rot,
+however much rot becomes life, their love.
 The cycle of decay is the mechanism by which
 this world is alive.
-All that passes returns changed,
-never quite the same.
+All that passes returns changed.
 Today, put to rest what needs burying.
 
 ## Festival of Spring
 
+Blossoms and sprouts triumph!
+Cold cannot halt their return.
+Shake off your own frost,
+shake the cruft of hibernation,
+clean and cleanse and cry,
+and then, in whatever way you can,
+let the rhythm of the world
+move you to dance.
+
 ## Festival of Summer
+
+Long days and warm nights clothe us now.
+The hot sun and cool dark shake hands
+and begin to trade their domain.
+Cherish the light while you can;
+give gifts while your lovers yet live.
+Revel raucously through the latest of annual dusks.
+Eat well, laugh loudly, and spite the haters;
+who has time to mind their binds?
 
 ## Festival of Fall
 
+While the bitter cold has yet to arrive,
+treasure the gold of bough and horizon alike.
+The best things in life are the hardest;
+tribulation takes us through winters of spirit.
+Honor the growing domain of night
+and prepare while you can.
+Gather and share, ensure plenitude!
+The individual wilts alone;
+the community thrives together.
+
 ## Festival of Winter
+
+In the frigid pale, night's dominion slips.
+Second by second, the promise of dawn returns.
+Dawn by dawn, seconds at a time, daylight blooms
+like all the green to come,
+promised by Gaia's will to live.
+Share in her commitment,
+her defiance of cold intertia.
+The cause of life is love;
+let it warm you down to the spirit.
+Celebrate! Share it with all you can.
 
 ## Respite
 
+In the quiet at the cycle's end, rest.
+Weakness is the body asking;
+sickness is the body demanding.
+Honor that it does you the kindness
+of hosting your spirit through everything,
+through joy and agony,
+through delight and misery,
+through satiation and starvation,
+down to your very last seconds alive.
+Honor it with reprieves.
+
 ## The Return
+
+A short cycle brings the wanderer home.
+Prodigal stranger, share your tales!
+O, how the wild bolsters you.
+O, what treasures the unknown hides.
+O, the secrets we leave to the shadows.
+Share tales of what made you;
+notice when you feel seen in what you hear.
+Little separates us, ultimately.
+Someday you too will be the wanderer
+coming home.
+
+## The Demise
+
+The weary beg for rest after a long cycle,
+but the dead beg for nothing.
+The cycle takes them, divides the union
+of Gaia and Creator that caused them.
+Absence makes the heart grow fonder,
+and while anything rots on Earth,
+their love will be born again.
+Grieve for the gone;
+prepare the welcome for those to arrive.

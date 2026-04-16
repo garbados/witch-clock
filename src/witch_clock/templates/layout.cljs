@@ -10,7 +10,11 @@
     [:p#subtitle text/subtitle]]
    [:hr]
    [:div#clock]
-   [:div#holidays]
    [:div#geo]
-   [:div#about
-    (about/explain-months)]])
+   [:div#intro
+    (about/calendar-intro)]
+   [:div#seasons]
+   [:div#months]
+   [:div#holidays]
+   [:div#outro
+    (about/calendar-outro)]])

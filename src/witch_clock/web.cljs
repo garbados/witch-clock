@@ -34,11 +34,30 @@
                      (calendar-templates/current-holidays year)
                      [:div])))
 
+(defn refresh-seasons! [year]
+  (alchemy/refresh :seasons
+                   (if year
+                     (calendar-templates/explain-seasons year)
+                     [:div])))
+
+(defn refresh-months! [year]
+  (alchemy/refresh :months
+                   (if year
+                     (calendar-templates/explain-months year)
+                     [:div])))
+
 (defn refresh-geo! [-geo]
   (alchemy/refresh :geo (geo-templates/ask-for-geo -geo)))
 
 (defn refresh-time! [{:keys [time]}]
   (alchemy/refresh :current-time (string/join ":" time)))
+
+(defn refresh-year! [year]
+  (refresh-holidays! year)
+  (refresh-seasons! year)
+  (refresh-months! year)
+  (when year
+    (reset! -date (calendar/get-day year))))
 
 (defn track-time! [-geo -year -date -time -time-timer]
   (when @-time-timer
@@ -59,6 +78,11 @@
                  (reset! -time (calendar/get-current-time @-date)))))
            (* 3 1000))))
 
+(defn refresh-date! [-geo -year -date -time -time-timer]
+  (let [time (calendar/get-current-time @-date)]
+    (refresh-clock! @-year @-date time)
+    (track-time! -geo -year -date -time -time-timer)))
+
 (defn update-geo! [-geo -greg-year -year]
   (refresh-geo! -geo)
   (if-let [{:keys [latitude longitude]} @-geo]
@@ -69,26 +93,17 @@
       (when (some? @-time-timer)
         (swap! -time-timer #(js/clearInterval %)))
       (refresh-clock! nil nil nil)
-      (refresh-holidays! nil))))
+      (refresh-year! nil))))
 
 (defn update-year! [-geo -greg-year]
   (when-let [{:keys [latitude longitude]} @-geo]
     (reset! -year (calendar/from-gregorian-year @-greg-year latitude longitude))))
 
-(defn refresh-year [-year]
-  (refresh-holidays! @-year)
-  (reset! -date (calendar/get-day @-year)))
-
-(defn refresh-date [-geo -year -date -time -time-timer]
-  (let [time (calendar/get-current-time @-date)]
-    (refresh-clock! @-year @-date time)
-    (track-time! -geo -year -date -time -time-timer)))
-
 (defn main-view [node]
   (add-watch -geo :watch-geo #(update-geo! -geo -greg-year -year))
   (add-watch -greg-year :watch-greg #(update-year! -geo -greg-year))
-  (add-watch -year :watch-year #(refresh-year -year))
-  (add-watch -date :watch-date #(refresh-date -geo -year -date -time -time-timer))
+  (add-watch -year :watch-year #(refresh-year! @-year))
+  (add-watch -date :watch-date #(refresh-date! -geo -year -date -time -time-timer))
   (add-watch -time :watch-time #(refresh-time! @-time))
   (.appendChild node (alchemize (layout-templates/container)))
   (setup-geo))
