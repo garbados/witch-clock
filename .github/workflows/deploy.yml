@@ -23,14 +23,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Prepare java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'microsoft'
+          java-version: '21.0.2'
+
+      - name: Install clojure tools
+        uses: DeLaGuardo/setup-clojure@13.4
+        with:
+          lein: 2.10.0
 
       - name: Install NodeJS
         uses: actions/setup-node@v4
         with:
           node-version: lts/* 
 
-      - run: npm i
+      - run: pnpm i
       
       - run: npm run release
 
