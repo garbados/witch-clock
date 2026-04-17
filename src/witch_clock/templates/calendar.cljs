@@ -12,7 +12,7 @@
      {:data-tooltip
       (string/join
        " "
-       (if (< (first time) 10)
+       (if (< (first time) calendar/HOURS-IN-HALF-DAY)
          ["Daylight hours are"
           (subs (str (/ day-hour-ms GREG-HOUR-MS)) 0 4)
           "Gregorian hours long."]
@@ -104,7 +104,7 @@
       [:li (str "Today began at " (.toLocaleString dawn) ". Daylight hours are " (subs (str (/ day-hour-ms GREG-HOUR-MS)) 0 4) " Gregorian hours long.")]
       [:li
        (str
-        (if (< hour 10)
+        (if (< hour calendar/HOURS-IN-HALF-DAY)
           (str "Night begins at " (.toLocaleString dusk) ".")
           (str "Night began at " (.toLocaleString dusk) "."))
         " Night hours are " (subs (str (/ night-hour-ms GREG-HOUR-MS)) 0 4) " Gregorian hours long.")]
