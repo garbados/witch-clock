@@ -24,6 +24,8 @@ module.exports = function (config) {
     client: {
       args: ['shadow.test.karma.init'],
       singleRun: true
-    }
+    },
+    pingTimeout: 60000,
+    browserNoActivityTimeout: 1000 * 60 * 5 // minutes
   })
 }

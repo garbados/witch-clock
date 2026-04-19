@@ -86,6 +86,9 @@
 (def MINUTES-IN-HOUR 60)
 (def SECONDS-IN-MINUTE 60)
 
+(defn print-date [dt]
+  (.toLocaleString dt))
+
 (defn- get-seasons [year & {:keys [southern?]}]
   (let [js-seasons (astro/Seasons year)
         js-last-seasons (astro/Seasons (dec year))
@@ -125,6 +128,7 @@
 (defn- compare-dates [op dt1 dt2 & dts]
   (apply op (map #(.getTime %) (concat [dt1 dt2] dts))))
 (def is-before (partial compare-dates <))
+(def is-or-before (partial compare-dates <=))
 (def is-after (partial compare-dates >))
 (defn days-between [days dt1 dt2]
   (count
@@ -253,9 +257,9 @@
         "The Demise")
       conclusion]])))
 
-(defn get-day
+(defn get-date
   ([witchy-year]
-   (get-day witchy-year (new js/Date)))
+   (get-date witchy-year (new js/Date)))
   ([{:keys [months seasons days cycle-end nth-cycle]} dt]
    (cond
      (is-before dt (:dawn (first days)))
@@ -279,7 +283,7 @@
            (->> dawn-to-dawn
                 (filter
                  (fn [[_cycle-i [dawn _next-dawn]]]
-                   (is-before dawn dt)))
+                   (is-or-before dawn dt)))
                 (map
                  (fn [[cycle-i [_dawn _next-dawn]]]
                    [(inc cycle-i) [_dawn _next-dawn]]))
@@ -315,8 +319,8 @@
            (->> sorted-moon-phase-dt
                 (filter
                  (fn [[_month _phase phase-dt]]
-                   (is-before dawn phase-dt)))
-                last)
+                   (is-before phase-dt next-dawn)))
+                first)
            [_month _phase month-dt]
            (->> sorted-moon-phase-dt
                 (filter
@@ -330,7 +334,7 @@
                  (fn [[_month _phase other-phase-dt]]
                    (is-before phase-dt other-phase-dt)))
                 last)
-           phase-i (days-between dawns phase-dt dawn)
+           phase-i (days-between dawns phase-dt next-dawn)
            phase-n (days-between dawns phase-dt next-phase-dt)
            [next-month _next-phase next-month-dt]
            (if (not= month next-month*)
@@ -342,7 +346,7 @@
                       (is-before month-dt next-month-dt)
                       (not= month next-month))))
                   last))
-           month-i (days-between dawns month-dt dawn)
+           month-i (days-between dawns month-dt next-dawn)
            month-n (days-between dawns month-dt next-month-dt)]
        {:cycle [nth-cycle (inc cycle-i) cycle-n]
         :season [season season-dt (inc season-i) season-n]

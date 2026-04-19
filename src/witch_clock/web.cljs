@@ -57,7 +57,7 @@
   (refresh-seasons! year)
   (refresh-months! year)
   (when year
-    (reset! -date (calendar/get-day year))))
+    (reset! -date (calendar/get-date year))))
 
 (defn track-time! [-geo -year -date -time -time-timer]
   (when @-time-timer
@@ -73,7 +73,7 @@
                        witchy-year (calendar/from-gregorian-year year latitude longitude)]
                    (reset! -year witchy-year))
                  (calendar/is-before (-> @-date :day (nth 2)) now)
-                 (reset! -date (calendar/get-day @-year now))
+                 (reset! -date (calendar/get-date @-year now))
                  :else
                  (reset! -time (calendar/get-current-time @-date)))))
            (* 3 1000))))
