@@ -16,6 +16,7 @@ All things change, don't they?
 - Use [astronomical calculations](https://github.com/cosinekitty/astronomy) rather than by pinging an observatory.
 - List the year's holiday, month, and season dates in advance.
 - Add and refine text blurbs.
+- Change how the southern hemisphere is handled. Previously, the southern summer solstice was treated as "winter", and only the names of seasons were changed, so that northern and southern calendars diverged not-so-much. However, who cares? Southern witch clocks now celebrate the June solstice as "winter", meaning the Jester's Moon and the beginning of new cycles in the south occurs during the north's summer months.
 
 ## Cycle 3 (Speculative)
 

@@ -4,7 +4,7 @@
 
 ## About the Calendar of the Witchmothers
 
-The annual cycle begins on the first new moon after the winter solstice (summer solstice, in the southern hemisphere), beginning with the Jester's Moon. The first cycle began on December 30, 2024, relative to longitude 45.515 and latitude -122.678.
+The annual cycle begins on the first new moon after the winter solstice, beginning with the Jester's Moon. The first cycle began on December 30, 2024, relative to longitude 45.515 and latitude -122.678. Because the winter solstice in the southern hemisphere occurs during the northern's summer solstice, the calendar can vary dramatically across the equator.
 
 A month is a lunar month, so there are either 12 or 13 months in a year, to align the differences between solar and lunar cycles. Each month contains four weeks, for the four phases of the moon: New, Waxing, Full, Waning. Feasts are celebrated on the first day of the full moon of each month.
 
